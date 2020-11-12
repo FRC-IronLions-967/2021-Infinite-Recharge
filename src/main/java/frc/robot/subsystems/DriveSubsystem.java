@@ -12,6 +12,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj.SPI;
 import frc.robot.IO;
 import frc.robot.Robot;
 import frc.robot.utils.Utils;
@@ -24,6 +25,8 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import org.apache.commons.math3.linear.*;
 
+import com.kauailabs.navx.frc.AHRS;
+
 
 public class DriveSubsystem extends SubsystemBase implements Subsystem {
   /**
@@ -31,6 +34,8 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
    */
 
   private double v = 0.0;
+
+  private double avgAcc = 0.0;
   
   public CANSparkMax rightMaster;
   public CANSparkMax rightSlave;
@@ -63,6 +68,8 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
   private double MAX;
 
   private BasicPosKalman kalman;
+
+  private AHRS gyro;
 
   public DriveSubsystem() {
     io = IO.getInstance();
@@ -104,6 +111,9 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
                                                                             {0.0, 0.0, 0.0, 0.0, 0.0, 0.1}});
 
     kalman = new BasicPosKalman(init, initErr);
+
+    gyro = new AHRS(SPI.Port.kMXP);
+    gyro.zeroYaw();
   }
 
   //class convenience method to move the robot to save space in the different drive methods
@@ -133,7 +143,7 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
     x = Utils.deadband(x, 0.05);
     y = Utils.deadband(y, 0.05);
 
-    double difV = y - v;
+    double difV = y - v; 
     double maxDifV = SmartDashboard.getNumber("maxAccel", 0.02d);
 
     if(difV > 0)
@@ -145,6 +155,8 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
 
     double l = v - s;
     double r = v + s;
+
+    avgAcc = (l + r) / 2.0;
 
     move(r, l);
   }
@@ -178,8 +190,27 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
     arcadeDrive(io.getDriverController().getRightStickX(), io.getDriverController().getLeftStickY());
 
     kalman.predict();
-    // Array2DRowRealMatrix xm = new Array2DRowRealMatrix(new double[][] {{0.0}, {0.0}, {}}) // 3.14/120
-    // kalman.measure(xm, r);
+
+    double r = rightMaster.getEncoder().getVelocity() * (Math.PI/120.0);
+    double l = leftMaster.getEncoder().getVelocity() * (Math.PI/120.0);
+
+    double theta = gyro.getYaw() * (180.0 / Math.PI);
+    if(theta < 0.0) theta += (2.0 * Math.PI);
+
+    double v = (r + l) / 2.0;
+    double vx = v * Math.cos(theta);
+    double vy = v * Math.sin(theta);
+    double ay = avgAcc * Math.cos(theta);
+    double ax = avgAcc * Math.sin(theta);
+    
+    Array2DRowRealMatrix xm = new Array2DRowRealMatrix(new double[][] {{0.0}, {0.0}, {vx}, {vy}, {ax}, {ay}}); // 3.14 / 120
+    Array2DRowRealMatrix err = new Array2DRowRealMatrix(new double[][] {{},
+                                                                        {},
+                                                                        {},
+                                                                        {},
+                                                                        {},
+                                                                        {}});
+    kalman.measure(xm, err);
 
     // SmartDashboard.putNumber("Right Speed", this.getRightSpeed());
     // SmartDashboard.putNumber("Left Speed", this.getLeftSpeed());
