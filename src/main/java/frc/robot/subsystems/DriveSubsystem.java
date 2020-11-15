@@ -156,7 +156,7 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
     double l = v - s;
     double r = v + s;
 
-    avgAcc = (l + r) / 2.0;
+    avgAcc = ((l + r) / 2.0) * 14.08;
 
     move(r, l);
   }
