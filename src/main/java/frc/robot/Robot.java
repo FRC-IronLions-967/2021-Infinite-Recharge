@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.*;
 import frc.robot.values.Values;
 
 /**
@@ -28,9 +28,9 @@ public class Robot extends TimedRobot {
   private static final String kCustomAuto = "My Auto";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
-  public static DriveSubsystem m_driveSubsystem;
   public static Values m_values;
   public static Values m_robotMap;
+  private SubsystemsInstance subsystemsInst;
 
   /**
    * This function is run when the robot is first started up and should be
@@ -54,7 +54,7 @@ public class Robot extends TimedRobot {
       e.printStackTrace();
     }
 
-    m_driveSubsystem = new DriveSubsystem();
+    subsystemsInst = SubsystemsInstance.getInstance();
   }
 
   /**
@@ -69,8 +69,8 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
 
-    SmartDashboard.putNumber("leftSpeed", m_driveSubsystem.getLeftSpeed());
-    SmartDashboard.putNumber("rightSpeed", m_driveSubsystem.getRightSpeed());
+    SmartDashboard.putNumber("leftSpeed", subsystemsInst.m_driveSubsystem.getLeftSpeed());
+    SmartDashboard.putNumber("rightSpeed", subsystemsInst.m_driveSubsystem.getRightSpeed());
   }
 
   /**
