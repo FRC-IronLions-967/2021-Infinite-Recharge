@@ -204,16 +204,30 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
     double ax = avgAcc * Math.sin(theta);
     
     Array2DRowRealMatrix xm = new Array2DRowRealMatrix(new double[][] {{0.0}, {0.0}, {vx}, {vy}, {ax}, {ay}}); // 3.14 / 120
-    Array2DRowRealMatrix err = new Array2DRowRealMatrix(new double[][] {{},
-                                                                        {},
-                                                                        {},
-                                                                        {},
-                                                                        {},
-                                                                        {}});
+    Array2DRowRealMatrix err = new Array2DRowRealMatrix(new double[][] {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+                                                                        {0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+                                                                        {0.0, 0.0, 0.05, 0.0, 0.0, 0.0},
+                                                                        {0.0, 0.0, 0.0, 0.05, 0.0, 0.0},
+                                                                        {0.0, 0.0, 0.0, 0.0, 0.075, 0.0},
+                                                                        {0.0, 0.0, 0.0, 0.0, 0.0, 0.075}});
     kalman.measure(xm, err);
+    kalman.update();
 
-    // SmartDashboard.putNumber("Right Speed", this.getRightSpeed());
-    // SmartDashboard.putNumber("Left Speed", this.getLeftSpeed());
+    double[][] result = kalman.getX().getData();
+
+    double x = result[0][0];
+    double y = result[1][0];
+    vx = result[2][0];
+    vy = result[3][0];
+    ax = result[4][0];
+    ay = result[5][0];
+
+    SmartDashboard.putNumber("x", x);
+    SmartDashboard.putNumber("y", y);
+    SmartDashboard.putNumber("vx", vx);
+    SmartDashboard.putNumber("vy", vy);
+    SmartDashboard.putNumber("ax", ax);
+    SmartDashboard.putNumber("ay", ay);
   }
 
   //I (Nathan) think this in miles/hr but I don't exactly remember
