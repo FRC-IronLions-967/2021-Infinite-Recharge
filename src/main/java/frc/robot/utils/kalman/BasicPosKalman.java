@@ -13,13 +13,13 @@ import org.apache.commons.math3.linear.*;
 
 public class BasicPosKalman {
     //state matrix
-    private Array2DRowRealMatrix x;
+    private RealMatrix x;
 
     //prediction state matrix
-    private Array2DRowRealMatrix xp;
+    private RealMatrix xp;
 
     //coefficient matrix for the state matrix in the prediction equation
-    private Array2DRowRealMatrix a;
+    private RealMatrix a;
 
     //coefficient matrix for the control matrix in the prediction equation - unused as I'm not using a control matrix
     // private Array2DRowRealMatrix b;
@@ -27,28 +27,31 @@ public class BasicPosKalman {
     // private Array2DRowRealMatrix u;
 
     //prediction process covariance matrix
-    private Array2DRowRealMatrix pp;
+    private RealMatrix pp;
 
     //process covariance matrix
-    private Array2DRowRealMatrix p;
+    private RealMatrix p;
 
     //kalman gain matrix
-    private Array2DRowRealMatrix k;
+    private RealMatrix k;
 
     //final measurement state matrix
-    private Array2DRowRealMatrix y;
+    private RealMatrix y;
 
     //coefficient for measured state matrix in measurement equation
-    private Array2DRowRealMatrix c;
+    private RealMatrix c;
 
     //coefficient matrix used for calculating kalman gain
-    private Array2DRowRealMatrix h;
+    private RealMatrix h;
 
     //identity matrix
-    private Array2DRowRealMatrix i;
+    private RealMatrix i;
+
+    // noise matrix
+    private RealMatrix q;
 
     //right now this configures the filter to track acceleration, velocity, and position in x and y directions
-    public BasicPosKalman(Array2DRowRealMatrix init, Array2DRowRealMatrix initErr) {
+    public BasicPosKalman(RealMatrix init, RealMatrix initErr) {
         x = init;
         // u = new Matrix(new double[][] {{x.getElement(2, 0)}, {x.getElement(3, 0)}, {x.getElement(4, 0)}, {x.getElement(5, 0)}});
         xp = new Array2DRowRealMatrix(6, 1);
@@ -72,8 +75,8 @@ public class BasicPosKalman {
         y = new Array2DRowRealMatrix(6, 1);
 
         //we don't have a way to directly measure position so this matrix zeroes those from the measurement
-        c = new Array2DRowRealMatrix(new double[][] {{0, 0, 0, 0, 0, 0},
-                                       {0, 0, 0, 0, 0, 0},
+        c = new Array2DRowRealMatrix(new double[][] {{1, 0, 0, 0, 0, 0},
+                                       {1, 0, 0, 0, 0, 0},
                                        {0, 0, 1, 0, 0, 0},
                                        {0, 0, 0, 1, 0, 0},
                                        {0, 0, 0, 0, 1, 0},
@@ -92,9 +95,16 @@ public class BasicPosKalman {
                                        {0, 0, 0, 1, 0, 0},
                                        {0, 0, 0, 0, 1, 0},
                                        {0, 0, 0, 0, 0, 1}});
+
+        q = new Array2DRowRealMatrix(new double[][] {{0.02, 0, 0, 0, 0, 0},
+                                                    {0, 0.02, 0, 0, 0, 0},
+                                                    {0, 0, 0.02, 0, 0, 0},
+                                                    {0, 0, 0, 0.02, 0, 0},
+                                                    {0, 0, 0, 0, 0.02, 0},
+                                                    {0, 0, 0, 0, 0, 0.02}});
     }
 
-    public Array2DRowRealMatrix getX() {
+    public RealMatrix getX() {
         return x;
     }
 
@@ -107,16 +117,17 @@ public class BasicPosKalman {
         // xp = MatrixOperations.multiply(a, x);
         xp = a.multiply(x);
 
-        //p_p = a * p * a^T + q (also not including q as it is a noise matrix)
+        //p_p = a * p * a^T + q
         // pp = MatrixOperations.multiply(a, MatrixOperations.multiply(p, a.transpose()));
-        pp = p.multiply((Array2DRowRealMatrix) a.transpose());
+        pp = p.multiply(a.transpose());
         pp = a.multiply(pp);
+        pp = p.add(q);
     }
 
     //xm is a matrix created with all of the values from the sensors
     //r is a matrix that holds the covariances of all of the sensor data
     //calculates the measured position and the kalman gain
-    public void measure(Array2DRowRealMatrix xm, Array2DRowRealMatrix r) {
+    public void measure(RealMatrix xm, RealMatrix r) {
         // y = MatrixOperations.multiply(c, xm);
         y = c.multiply(xm);
 
@@ -128,7 +139,7 @@ public class BasicPosKalman {
         k = k.add(r);
 
         // Matrix inverse = new Matrix(MatrixUtils.inverse(new Matrix(k.getMat())).getData());
-        Array2DRowRealMatrix inverse = (Array2DRowRealMatrix) MatrixUtils.inverse(k);
+        RealMatrix inverse = MatrixUtils.inverse(k);
 
         // k = MatrixOperations.multiply(inverse, MatrixOperations.multiply(pp, h));
         k = pp.multiply(h);
@@ -153,7 +164,7 @@ public class BasicPosKalman {
         // System.out.println();
         // u = new Matrix(new double[][] {{x.getElement(2, 0)}, {x.getElement(3, 0)}, {x.getElement(4, 0)}, {x.getElement(5, 0)}});
         // p = MatrixOperations.multiply(MatrixOperations.subtract(i, MatrixOperations.multiply(k, h)), p);
-        Array2DRowRealMatrix temp = k.multiply(h);
+        RealMatrix temp = k.multiply(h);
         temp = i.subtract(p);
         p = temp.multiply(p);
         

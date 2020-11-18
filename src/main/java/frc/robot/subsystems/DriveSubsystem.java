@@ -35,6 +35,8 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
 
   private double v = 0.0;
 
+  private double vFt = 0.0;
+
   private double avgAcc = 0.0;
   
   public CANSparkMax rightMaster;
@@ -102,13 +104,13 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
 
     MAX = 1.0;
 
-    Array2DRowRealMatrix init = new Array2DRowRealMatrix(new double[][] {{0}, {0}, {0}, {0}, {0}, {0}});
-    Array2DRowRealMatrix initErr = new Array2DRowRealMatrix(new double[][] {{0.1, 0.0, 0.0, 0.0, 0.0, 0.0},
-                                                                            {0.0, 0.1, 0.0, 0.0, 0.0, 0.0},
-                                                                            {0.0, 0.0, 0.1, 0.0, 0.0, 0.0},
-                                                                            {0.0, 0.0, 0.0, 0.1, 0.0, 0.0},
-                                                                            {0.0, 0.0, 0.0, 0.0, 0.1, 0.0},
-                                                                            {0.0, 0.0, 0.0, 0.0, 0.0, 0.1}});
+    RealMatrix init = new Array2DRowRealMatrix(new double[][] {{0}, {0}, {0}, {0}, {0}, {0}});
+    RealMatrix initErr = new Array2DRowRealMatrix(new double[][] {{0.01, 0.0, 0.0, 0.0, 0.0, 0.0},
+                                                                            {0.0, 0.01, 0.0, 0.0, 0.0, 0.0},
+                                                                            {0.0, 0.0, 0.2, 0.0, 0.0, 0.0},
+                                                                            {0.0, 0.0, 0.0, 0.2, 0.0, 0.0},
+                                                                            {0.0, 0.0, 0.0, 0.0, 0.2, 0.0},
+                                                                            {0.0, 0.0, 0.0, 0.0, 0.0, 0.2}});
 
     kalman = new BasicPosKalman(init, initErr);
 
@@ -146,17 +148,24 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
     double difV = y - v; 
     double maxDifV = SmartDashboard.getNumber("maxAccel", 0.02d);
 
-    if(difV > 0)
-      v += (difV > maxDifV) ? maxDifV : difV;
-    else
-      v -= (Math.abs(difV) > maxDifV) ? maxDifV : Math.abs(difV);
+    double tmp = 0.0;
+
+    if(difV > 0) {
+      tmp = (difV > maxDifV) ? maxDifV : difV;
+      v += tmp;
+    } else {
+      tmp = (Math.abs(difV) > maxDifV) ? maxDifV : Math.abs(difV);
+      v -= tmp;
+    }
+
+    avgAcc = tmp * 14.08;
 
     double s = (v < 0.1) ? SmartDashboard.getNumber("scale", 0.5d) * x * SmartDashboard.getNumber("zeroTurn", 0.5d) : SmartDashboard.getNumber("scale", 0.5) * x * v;
 
     double l = v - s;
     double r = v + s;
 
-    avgAcc = ((l + r) / 2.0) * 14.08;
+    vFt = v * 14.08;
 
     move(r, l);
   }
@@ -194,29 +203,45 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
     double r = rightMaster.getEncoder().getVelocity() * (Math.PI/120.0);
     double l = leftMaster.getEncoder().getVelocity() * (Math.PI/120.0);
 
-    double theta = gyro.getYaw() * (180.0 / Math.PI);
+    double theta = gyro.getYaw() * (Math.PI / 180.0);
+    SmartDashboard.putNumber("theta", theta);
     if(theta < 0.0) theta += (2.0 * Math.PI);
 
+    // get the current position values and update them with the current velocity and acceleration readings
+    double[][] result = kalman.getX().getData();
+    double x = result[0][0];
+    double y = result[1][0];
+
     double v = (r + l) / 2.0;
-    double vx = v * Math.cos(theta);
-    double vy = v * Math.sin(theta);
-    double ay = avgAcc * Math.cos(theta);
-    double ax = avgAcc * Math.sin(theta);
+    double vx = vFt * Math.cos(theta);
+    double vy = vFt * Math.sin(theta);
+    double ax = avgAcc * Math.cos(theta);
+    double ay = avgAcc * Math.sin(theta);
+
+    x += (vx * 0.02) + (ax * 0.002);
+    y += (vy * 0.02) + (ay * 0.002);
+
+    SmartDashboard.putNumber("calcx", x);
+    SmartDashboard.putNumber("calcy0", y);
+    SmartDashboard.putNumber("calcvx", vx);
+    SmartDashboard.putNumber("calcvy", vy);
+    SmartDashboard.putNumber("calcax", ax);
+    SmartDashboard.putNumber("calcay", ay);
     
-    Array2DRowRealMatrix xm = new Array2DRowRealMatrix(new double[][] {{0.0}, {0.0}, {vx}, {vy}, {ax}, {ay}}); // 3.14 / 120
-    Array2DRowRealMatrix err = new Array2DRowRealMatrix(new double[][] {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-                                                                        {0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-                                                                        {0.0, 0.0, 0.05, 0.0, 0.0, 0.0},
-                                                                        {0.0, 0.0, 0.0, 0.05, 0.0, 0.0},
-                                                                        {0.0, 0.0, 0.0, 0.0, 0.075, 0.0},
-                                                                        {0.0, 0.0, 0.0, 0.0, 0.0, 0.075}});
+    RealMatrix xm = new Array2DRowRealMatrix(new double[][] {{x}, {y}, {vx}, {vy}, {ax}, {ay}}); // 3.14 / 120
+    RealMatrix err = new Array2DRowRealMatrix(new double[][] {{0.08, 0.0, 0.0, 0.0, 0.0, 0.0},
+                                                                        {0.08, 0.0, 0.0, 0.0, 0.0, 0.0},
+                                                                        {0.0, 0.0, 0.025, 0.0, 0.0, 0.0},
+                                                                        {0.0, 0.0, 0.0, 0.025, 0.0, 0.0},
+                                                                        {0.0, 0.0, 0.0, 0.0, 0.05, 0.0},
+                                                                        {0.0, 0.0, 0.0, 0.0, 0.0, 0.05}});
     kalman.measure(xm, err);
     kalman.update();
 
-    double[][] result = kalman.getX().getData();
+    result = kalman.getX().getData();
 
-    double x = result[0][0];
-    double y = result[1][0];
+    x = result[0][0];
+    y = result[1][0];
     vx = result[2][0];
     vy = result[3][0];
     ax = result[4][0];
