@@ -1,5 +1,8 @@
 /*
-    This class is supposed to use a Kalman filter to track position along with x and y velocity and acceleration
+    This class is a modification of the original BasicPosKalman and is a stripped down version without velocity tracking.
+    It was my hope that this would help to eliminate some error by simplifying the Kalman filtering process.
+
+    This class is supposed to use a Kalman filter to track position along with x and y velocity.
     If anyone reading this actually has experience with this, I realize this is probably a complete abhorration of
     a Kalman filter, and I'm sorry
 
@@ -11,7 +14,7 @@ package frc.robot.utils.kalman;
 
 import org.apache.commons.math3.linear.*;
 
-public class BasicPosKalman {
+public class BasicPosKalman2 {
     //state matrix
     private RealMatrix x;
 
@@ -51,17 +54,15 @@ public class BasicPosKalman {
     private RealMatrix q;
 
     //right now this configures the filter to track acceleration, velocity, and position in x and y directions
-    public BasicPosKalman(RealMatrix init, RealMatrix initErr) {
+    public BasicPosKalman2(RealMatrix init, RealMatrix initErr) {
         x = init;
         // u = new Matrix(new double[][] {{x.getElement(2, 0)}, {x.getElement(3, 0)}, {x.getElement(4, 0)}, {x.getElement(5, 0)}});
-        xp = new Array2DRowRealMatrix(6, 1);
+        xp = new Array2DRowRealMatrix(4, 1);
         //this matrix is initialized for the 50 Hz of the periodic functions
-        a = new Array2DRowRealMatrix(new double[][] {{1, 0, .02, 0, .002, 0},
-                                       {0, 1, 0, .02, 0, .002},
-                                       {0, 0, 1, 0, .02, 0},
-                                       {0, 0, 0, 1, 0, .02},
-                                       {0, 0, 0, 0, 1, 0},
-                                       {0, 0, 0, 0, 0, 1}});
+        a = new Array2DRowRealMatrix(new double[][] {{1, 0, .02, 0},
+                                                    {0, 1, 0, .02},
+                                                    {0, 0, 1, 0},
+                                                    {0, 0, 0, 1}});
 
         // b = new Matrix(new double[][] {{.02, 0, .002, 0},
                                     //    {0, .02, 0, .002},
@@ -70,39 +71,30 @@ public class BasicPosKalman {
                                     //    {0, 0, 0, 0},
                                     //    {0, 0, 0, 0}});
         p = initErr;
-        pp = new Array2DRowRealMatrix(6, 6);
-        k = new Array2DRowRealMatrix(6, 1);
-        y = new Array2DRowRealMatrix(6, 1);
+        pp = new Array2DRowRealMatrix(4, 4);
+        k = new Array2DRowRealMatrix(4, 1);
+        y = new Array2DRowRealMatrix(4, 1);
 
-        //we don't have a way to directly measure position so this matrix zeroes those from the measurement
-        c = new Array2DRowRealMatrix(new double[][] {{1, 0, 0, 0, 0, 0},
-                                       {1, 0, 0, 0, 0, 0},
-                                       {0, 0, 1, 0, 0, 0},
-                                       {0, 0, 0, 1, 0, 0},
-                                       {0, 0, 0, 0, 1, 0},
-                                       {0, 0, 0, 0, 0, 1}});
+        c = new Array2DRowRealMatrix(new double[][] {{1, 0, 0, 0},
+                                       {1, 0, 0, 0},
+                                       {0, 0, 1, 0},
+                                       {0, 0, 0, 1}});
 
-        h = new Array2DRowRealMatrix(new double[][] {{1, 0, 0, 0, 0, 0},
-                                       {0, 1, 0, 0, 0, 0},
-                                       {0, 0, 1, 0, 0, 0},
-                                       {0, 0, 0, 1, 0, 0},
-                                       {0, 0, 0, 0, 1, 0},
-                                       {0, 0, 0, 0, 0, 1}});
+        h = new Array2DRowRealMatrix(new double[][] {{1, 0, 0, 0},
+                                       {0, 1, 0, 0},
+                                       {0, 0, 1, 0},
+                                       {0, 0, 0, 1}});
 
-        i = new Array2DRowRealMatrix(new double[][] {{1, 0, 0, 0, 0, 0},
-                                       {0, 1, 0, 0, 0, 0},
-                                       {0, 0, 1, 0, 0, 0},
-                                       {0, 0, 0, 1, 0, 0},
-                                       {0, 0, 0, 0, 1, 0},
-                                       {0, 0, 0, 0, 0, 1}});
+        i = new Array2DRowRealMatrix(new double[][] {{1, 0, 0, 0},
+                                       {0, 1, 0, 0},
+                                       {0, 0, 1, 0},
+                                       {0, 0, 0, 1}});
 
         // this noise matrix prevents the covariance from becoming 0 and stopping the filter
-        q = new Array2DRowRealMatrix(new double[][] {{0.02, 0, 0, 0, 0, 0},
-                                                    {0, 0.02, 0, 0, 0, 0},
-                                                    {0, 0, 0.02, 0, 0, 0},
-                                                    {0, 0, 0, 0.02, 0, 0},
-                                                    {0, 0, 0, 0, 0.02, 0},
-                                                    {0, 0, 0, 0, 0, 0.02}});
+        q = new Array2DRowRealMatrix(new double[][] {{0.02, 0, 0, 0},
+                                                    {0, 0.02, 0, 0},
+                                                    {0, 0, 0.02, 0},
+                                                    {0, 0, 0, 0.02}});
     }
 
     public RealMatrix getX() {
