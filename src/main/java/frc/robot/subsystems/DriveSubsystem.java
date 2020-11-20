@@ -86,11 +86,11 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
     rightSlave.follow(rightMaster);
     leftSlave.follow(leftMaster);
 
-    rightMaster.setInverted(false);
-    rightSlave.setInverted(false);
+    rightMaster.setInverted(true);
+    rightSlave.setInverted(true);
 
-    leftMaster.setInverted(false);
-    leftSlave.setInverted(false);
+    leftMaster.setInverted(true);
+    leftSlave.setInverted(true);
 
     LookupGenerator driveGenerator = new LookupGenerator(Double.parseDouble(Robot.m_values.getValue("driveDeadband")), Double.parseDouble(Robot.m_values.getValue("driveMinPower")));
     LookupGenerator turnGenerator = new LookupGenerator(Double.parseDouble(Robot.m_values.getValue("turnDeadband")), Double.parseDouble(Robot.m_values.getValue("turnMinPower")),
@@ -146,6 +146,7 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
     y = Utils.deadband(y, 0.05);
 
     double difV = y - v; 
+    SmartDashboard.putNumber("difV", difV);
     double maxDifV = SmartDashboard.getNumber("maxAccel", 0.02d);
 
     double tmp = 0.0;
@@ -153,19 +154,19 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
     if(difV > 0) {
       tmp = (difV > maxDifV) ? maxDifV : difV;
       v += tmp;
+      avgAcc = tmp * 14.08;
     } else {
       tmp = (Math.abs(difV) > maxDifV) ? maxDifV : Math.abs(difV);
       v -= tmp;
+      avgAcc = -tmp * 14.08;
     }
-
-    avgAcc = tmp * 14.08;
 
     double s = (v < 0.1) ? SmartDashboard.getNumber("scale", 0.5d) * x * SmartDashboard.getNumber("zeroTurn", 0.5d) : SmartDashboard.getNumber("scale", 0.5) * x * v;
 
     double l = v - s;
     double r = v + s;
 
-    vFt = v * 14.08;
+    // vFt = ((l + r) / 2.0) * 14.08;
 
     move(r, l);
   }
@@ -196,23 +197,24 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
 
   @Override
   public void periodic() {
-    arcadeDrive(io.getDriverController().getRightStickX(), io.getDriverController().getLeftStickY());
+    arcadeDrive(-io.getDriverController().getRightStickX(), -io.getDriverController().getLeftStickY());
+
+    double[][] result = kalman.getX().getData();
 
     kalman.predict();
 
-    double r = rightMaster.getEncoder().getVelocity() * (Math.PI/120.0);
-    double l = leftMaster.getEncoder().getVelocity() * (Math.PI/120.0);
+    double r = rightMaster.getEncoder().getVelocity() * 0.002445; // (Math.PI / 120.0);
+    double l = -leftMaster.getEncoder().getVelocity() * 0.002445; // (Math.PI / 120.0);
+    vFt = (r + l) / 2.0;
 
     double theta = gyro.getYaw() * (Math.PI / 180.0);
     SmartDashboard.putNumber("theta", theta);
     if(theta < 0.0) theta += (2.0 * Math.PI);
 
     // get the current position values and update them with the current velocity and acceleration readings
-    double[][] result = kalman.getX().getData();
     double x = result[0][0];
     double y = result[1][0];
 
-    double v = (r + l) / 2.0;
     double vx = vFt * Math.cos(theta);
     double vy = vFt * Math.sin(theta);
     double ax = avgAcc * Math.cos(theta);
@@ -222,19 +224,19 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
     y += (vy * 0.02) + (ay * 0.002);
 
     SmartDashboard.putNumber("calcx", x);
-    SmartDashboard.putNumber("calcy0", y);
+    SmartDashboard.putNumber("calcy", y);
     SmartDashboard.putNumber("calcvx", vx);
     SmartDashboard.putNumber("calcvy", vy);
     SmartDashboard.putNumber("calcax", ax);
     SmartDashboard.putNumber("calcay", ay);
     
     RealMatrix xm = new Array2DRowRealMatrix(new double[][] {{x}, {y}, {vx}, {vy}, {ax}, {ay}}); // 3.14 / 120
-    RealMatrix err = new Array2DRowRealMatrix(new double[][] {{0.08, 0.0, 0.0, 0.0, 0.0, 0.0},
-                                                                        {0.08, 0.0, 0.0, 0.0, 0.0, 0.0},
-                                                                        {0.0, 0.0, 0.025, 0.0, 0.0, 0.0},
-                                                                        {0.0, 0.0, 0.0, 0.025, 0.0, 0.0},
-                                                                        {0.0, 0.0, 0.0, 0.0, 0.05, 0.0},
-                                                                        {0.0, 0.0, 0.0, 0.0, 0.0, 0.05}});
+    RealMatrix err = new Array2DRowRealMatrix(new double[][] {{0.16, 0.0, 0.0, 0.0, 0.0, 0.0},
+                                                                        {0.0, 0.16, 0.0, 0.0, 0.0, 0.0},
+                                                                        {0.0, 0.0, 0.05, 0.0, 0.0, 0.0},
+                                                                        {0.0, 0.0, 0.0, 0.05, 0.0, 0.0},
+                                                                        {0.0, 0.0, 0.0, 0.0, 0.07, 0.0},
+                                                                        {0.0, 0.0, 0.0, 0.0, 0.0, 0.07}});
     kalman.measure(xm, err);
     kalman.update();
 
