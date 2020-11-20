@@ -11,6 +11,8 @@ package frc.robot.utils.kalman;
 
 import org.apache.commons.math3.linear.*;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 public class BasicPosKalman {
     //state matrix
     private RealMatrix x;
@@ -76,7 +78,7 @@ public class BasicPosKalman {
 
         //we don't have a way to directly measure position so this matrix zeroes those from the measurement
         c = new Array2DRowRealMatrix(new double[][] {{1, 0, 0, 0, 0, 0},
-                                       {1, 0, 0, 0, 0, 0},
+                                       {0, 1, 0, 0, 0, 0},
                                        {0, 0, 1, 0, 0, 0},
                                        {0, 0, 0, 1, 0, 0},
                                        {0, 0, 0, 0, 1, 0},
@@ -131,6 +133,8 @@ public class BasicPosKalman {
     public void measure(RealMatrix xm, RealMatrix r) {
         // y = MatrixOperations.multiply(c, xm);
         y = c.multiply(xm);
+        SmartDashboard.putNumber("predx", x.getData()[0][0]);
+        SmartDashboard.putNumber("predy", x.getData()[1][0]);
 
         //i split this into three lines because it was even more unreadable the other way
         //the equation is: (pp*h)/((h*pp*h^T) + r)
@@ -150,9 +154,17 @@ public class BasicPosKalman {
 
     public void update() {
         x = h.multiply(x);
+        // SmartDashboard.putNumber("hmultx", x.getData()[0][0]);
+        // SmartDashboard.putNumber("hmulty", x.getData()[1][0]);
         x = y.subtract(x);
+        // SmartDashboard.putNumber("ysubx", x.getData()[0][0]);
+        // SmartDashboard.putNumber("ysuby", x.getData()[1][0]);
         x = k.multiply(x);
+        // SmartDashboard.putNumber("kmultx", x.getData()[0][0]);
+        // SmartDashboard.putNumber("kmulty", x.getData()[1][0]);
         x = xp.add(x);
+        // SmartDashboard.putNumber("xaddx", x.getData()[0][0]);
+        // SmartDashboard.putNumber("xaddy", x.getData()[1][0]);
 
         RealMatrix temp = k.multiply(h);
         temp = i.subtract(p);
