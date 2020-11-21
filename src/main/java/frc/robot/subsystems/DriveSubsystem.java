@@ -38,6 +38,9 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
   private double vFt = 0.0;
 
   private double avgAcc = 0.0;
+
+  private double prevL = 0.0;
+  private double prevR = 0.0;
   
   public CANSparkMax rightMaster;
   public CANSparkMax rightSlave;
@@ -154,11 +157,11 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
     if(difV > 0) {
       tmp = (difV > maxDifV) ? maxDifV : difV;
       v += tmp;
-      avgAcc = tmp * 14.08;
+      // avgAcc = tmp * 14.08;
     } else {
       tmp = (Math.abs(difV) > maxDifV) ? maxDifV : Math.abs(difV);
       v -= tmp;
-      avgAcc = -tmp * 14.08;
+      // avgAcc = -tmp * 14.08;
     }
 
     double s = (v < 0.1) ? SmartDashboard.getNumber("scale", 0.5d) * x * SmartDashboard.getNumber("zeroTurn", 0.5d) : SmartDashboard.getNumber("scale", 0.5) * x * v;
@@ -203,10 +206,15 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
 
     kalman.predict();
 
-    double r = rightMaster.getEncoder().getVelocity() * 0.002445; // (Math.PI / 120.0);
-    double l = -leftMaster.getEncoder().getVelocity() * 0.002445; // (Math.PI / 120.0);
+    // the 0.89 is to compensate for the wheel against the surface that it is driving on, may need to be changed
+    // for different surfaces
+    double r = rightMaster.getEncoder().getVelocity() * 0.002445 * 0.89; // (Math.PI / 120.0);
+    double l = -leftMaster.getEncoder().getVelocity() * 0.002445 * 0.89; // (Math.PI / 120.0);
     vFt = (r + l) / 2.0;
+    avgAcc = ((r - prevR) + (l - prevL)) / 0.04;
 
+    SmartDashboard.putNumber("rawAngle", gyro.getYaw());
+    SmartDashboard.putNumber("compass", gyro.getCompassHeading());
     double theta = gyro.getYaw() * (Math.PI / 180.0);
     SmartDashboard.putNumber("theta", theta);
     if(theta < 0.0) theta += (2.0 * Math.PI);
@@ -239,6 +247,9 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
                                                                         {0.0, 0.0, 0.0, 0.0, 0.0, 0.07}});
     kalman.measure(xm, err);
     kalman.update();
+
+    prevL = l;
+    prevR = r;
 
     result = kalman.getX().getData();
 
