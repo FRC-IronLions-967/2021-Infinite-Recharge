@@ -76,6 +76,14 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
 
   private AHRS gyro;
 
+  // value that accounts for the tire's interactions with the tile floor
+  private final double SURFACE_SCALE_FACTOR = 0.89;
+
+  // conversion factor from RPM returned from encoders to ft/s
+  private final double RPM_TO_FTPS = 0.002445;
+  // conversion factor from RPM returned from encoders to mi/h
+  private final double RPM_TO_MPH = 0.001667;
+
   public DriveSubsystem() {
     io = IO.getInstance();
 
@@ -202,14 +210,28 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
   public void periodic() {
     arcadeDrive(-io.getDriverController().getRightStickX(), -io.getDriverController().getLeftStickY());
 
+    updateKalman();
+  }
+
+  //I (Nathan) think this in miles/hr but I don't exactly remember
+  //remember to document your code, kids
+  public double getRightSpeed() {
+    return rightMaster.getEncoder().getVelocity() * RPM_TO_MPH;
+  }
+
+  public double getLeftSpeed() {
+    return leftMaster.getEncoder().getVelocity() * RPM_TO_MPH;
+  }
+
+  private void updateKalman() {
     double[][] result = kalman.getX().getData();
 
     kalman.predict();
 
     // the 0.89 is to compensate for the wheel against the surface that it is driving on, may need to be changed
     // for different surfaces
-    double r = rightMaster.getEncoder().getVelocity() * 0.002445 * 0.89; // (Math.PI / 120.0);
-    double l = -leftMaster.getEncoder().getVelocity() * 0.002445 * 0.89; // (Math.PI / 120.0);
+    double r = rightMaster.getEncoder().getVelocity() * RPM_TO_FTPS * SURFACE_SCALE_FACTOR; // (Math.PI / 120.0);
+    double l = -leftMaster.getEncoder().getVelocity() * RPM_TO_FTPS * SURFACE_SCALE_FACTOR; // (Math.PI / 120.0);
     vFt = (r + l) / 2.0;
     avgAcc = ((r - prevR) + (l - prevL)) / 0.04;
 
@@ -266,16 +288,6 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
     SmartDashboard.putNumber("vy", vy);
     SmartDashboard.putNumber("ax", ax);
     SmartDashboard.putNumber("ay", ay);
-  }
-
-  //I (Nathan) think this in miles/hr but I don't exactly remember
-  //remember to document your code, kids
-  public double getRightSpeed() {
-    return rightMaster.getEncoder().getVelocity() * 0.001667;
-  }
-
-  public double getLeftSpeed() {
-    return leftMaster.getEncoder().getVelocity() * 0.001667;
   }
 
 }
