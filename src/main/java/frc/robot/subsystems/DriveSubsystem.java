@@ -145,39 +145,27 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
 
   //method to be called from the arcade drive command
   public void arcadeDrive(double x, double y) {
-    // double r, l;
-
-    // //set the values of r and l based off of x and y axes - may need to switch addition and subtraction
-    // r = x - y;
-    // l = x + y;
-
-    // move(r, l);
 
     x = Utils.deadband(x, 0.05);
     y = Utils.deadband(y, 0.05);
 
+    // difference between current velocity and commanded velocity in the y direction
     double difV = y - v; 
     SmartDashboard.putNumber("difV", difV);
     double maxDifV = SmartDashboard.getNumber("maxAccel", 0.02d);
 
-    double tmp = 0.0;
-
     if(difV > 0) {
-      tmp = (difV > maxDifV) ? maxDifV : difV;
-      v += tmp;
-      // avgAcc = tmp * 14.08;
+      v += (difV > maxDifV) ? maxDifV : difV;
     } else {
-      tmp = (Math.abs(difV) > maxDifV) ? maxDifV : Math.abs(difV);
-      v -= tmp;
-      // avgAcc = -tmp * 14.08;
+      v -= (Math.abs(difV) > maxDifV) ? maxDifV : Math.abs(difV);
     }
 
-    double s = (v < 0.1) ? SmartDashboard.getNumber("scale", 0.5d) * x * SmartDashboard.getNumber("zeroTurn", 0.5d) : SmartDashboard.getNumber("scale", 0.5) * x * v;
+    double s = (Math.abs(v) < 0.1) ? SmartDashboard.getNumber("scale", 0.5d) * x * SmartDashboard.getNumber("zeroTurn", 0.5d) : SmartDashboard.getNumber("scale", 0.5) * x * v;
+
 
     double l = v - s;
     double r = v + s;
 
-    // vFt = ((l + r) / 2.0) * 14.08;
 
     move(r, l);
   }
@@ -188,8 +176,6 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
     //"I have no clue how this works ask Nathan" - Owen
     r = ((x > 0) ? turnLookup[(int) Math.floor(Math.abs(x) * 100)] : -turnLookup[(int) Math.floor(Math.abs(x) * 100)]) + ((y > 0) ? driveLookup[(int) Math.floor(Math.abs(y) * 100)] : -driveLookup[(int) Math.floor(Math.abs(y) * 100)]);
     l = ((x > 0) ? turnLookup[(int) Math.floor(Math.abs(x) * 100)] : -turnLookup[(int) Math.floor(Math.abs(x) * 100)]) - ((y > 0) ? driveLookup[(int) Math.floor(Math.abs(y) * 100)] : -driveLookup[(int) Math.floor(Math.abs(y) * 100)]);
-    // SmartDashboard.putNumber("rightPower", r);
-    // SmartDashboard.putNumber("leftPower", l);
     move(r, l);
   }
 
