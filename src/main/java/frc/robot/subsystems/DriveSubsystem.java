@@ -76,6 +76,8 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
 
   private AHRS gyro;
 
+  private double angleOffset = 0.0;
+
   // value that accounts for the tire's interactions with the tile floor
   private final double SURFACE_SCALE_FACTOR = 0.89;
 
@@ -126,7 +128,9 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
     kalman = new BasicPosKalman(init, initErr);
 
     gyro = new AHRS(SPI.Port.kMXP);
-    gyro.zeroYaw();
+    gyro.reset();
+
+    // angleOffset = gyro.getAngle();
   }
 
   //class convenience method to move the robot to save space in the different drive methods
@@ -192,13 +196,6 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
     move(r, l);
   }
 
-  @Override
-  public void periodic() {
-    arcadeDrive(-io.getDriverController().getRightStickX(), -io.getDriverController().getLeftStickY());
-
-    updateKalman();
-  }
-
   //I (Nathan) think this in miles/hr but I don't exactly remember
   //remember to document your code, kids
   public double getRightSpeed() {
@@ -221,11 +218,11 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
     vFt = (r + l) / 2.0;
     avgAcc = ((r - prevR) + (l - prevL)) / 0.04;
 
-    SmartDashboard.putNumber("rawAngle", gyro.getYaw());
-    SmartDashboard.putNumber("compass", gyro.getCompassHeading());
-    double theta = gyro.getYaw() * (Math.PI / 180.0);
+    SmartDashboard.putNumber("rawAngle", gyro.getAngle() - angleOffset);
+    // SmartDashboard.putNumber("compass", gyro.getCompassHeading());
+    double theta = (gyro.getAngle() - angleOffset) * (Math.PI / 180.0);
     SmartDashboard.putNumber("theta", theta);
-    if(theta < 0.0) theta += (2.0 * Math.PI);
+    // if(theta < 0.0) theta += (2.0 * Math.PI);
 
     // get the current position values and update them with the current velocity and acceleration readings
     double x = result[0][0];
@@ -239,12 +236,12 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
     x += (vx * 0.02) + (ax * 0.002);
     y += (vy * 0.02) + (ay * 0.002);
 
-    SmartDashboard.putNumber("calcx", x);
-    SmartDashboard.putNumber("calcy", y);
-    SmartDashboard.putNumber("calcvx", vx);
-    SmartDashboard.putNumber("calcvy", vy);
-    SmartDashboard.putNumber("calcax", ax);
-    SmartDashboard.putNumber("calcay", ay);
+    // SmartDashboard.putNumber("calcx", x);
+    // SmartDashboard.putNumber("calcy", y);
+    // SmartDashboard.putNumber("calcvx", vx);
+    // SmartDashboard.putNumber("calcvy", vy);
+    // SmartDashboard.putNumber("calcax", ax);
+    // SmartDashboard.putNumber("calcay", ay);
     
     RealMatrix xm = new Array2DRowRealMatrix(new double[][] {{x}, {y}, {vx}, {vy}, {ax}, {ay}}); // 3.14 / 120
     RealMatrix err = new Array2DRowRealMatrix(new double[][] {{0.16, 0.0, 0.0, 0.0, 0.0, 0.0},
@@ -274,6 +271,38 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
     SmartDashboard.putNumber("vy", vy);
     SmartDashboard.putNumber("ax", ax);
     SmartDashboard.putNumber("ay", ay);
+  }
+
+  // resets the kalman filter's values to 0, useful for getting rid of accumulated errors
+  public void resetKalman() {
+    RealMatrix init = new Array2DRowRealMatrix(new double[][] {{0}, {0}, {0}, {0}, {0}, {0}});
+    RealMatrix initErr = new Array2DRowRealMatrix(new double[][] {{0.01, 0.0, 0.0, 0.0, 0.0, 0.0},
+                                                                  {0.0, 0.01, 0.0, 0.0, 0.0, 0.0},
+                                                                  {0.0, 0.0, 0.2, 0.0, 0.0, 0.0},
+                                                                  {0.0, 0.0, 0.0, 0.2, 0.0, 0.0},
+                                                                  {0.0, 0.0, 0.0, 0.0, 0.2, 0.0},
+                                                                  {0.0, 0.0, 0.0, 0.0, 0.0, 0.2}});
+    gyro.reset();  
+  }
+
+  // same as the other definition for this method, but sets the starting position to (x, y)
+  public void resetKalman(double x, double y) {
+    RealMatrix init = new Array2DRowRealMatrix(new double[][] {{x}, {y}, {0}, {0}, {0}, {0}});
+    RealMatrix initErr = new Array2DRowRealMatrix(new double[][] {{0.01, 0.0, 0.0, 0.0, 0.0, 0.0},
+                                                                  {0.0, 0.01, 0.0, 0.0, 0.0, 0.0},
+                                                                  {0.0, 0.0, 0.2, 0.0, 0.0, 0.0},
+                                                                  {0.0, 0.0, 0.0, 0.2, 0.0, 0.0},
+                                                                  {0.0, 0.0, 0.0, 0.0, 0.2, 0.0},
+                                                                  {0.0, 0.0, 0.0, 0.0, 0.0, 0.2}});
+  }
+
+  @Override
+  public void periodic() {
+    arcadeDrive(-io.getDriverController().getRightStickX(), -io.getDriverController().getLeftStickY());
+
+    if(io.getDriverController().isButtonPressed("A")) resetKalman();
+
+    updateKalman();
   }
 
 }
