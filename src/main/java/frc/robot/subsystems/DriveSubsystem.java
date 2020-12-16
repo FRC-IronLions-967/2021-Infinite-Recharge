@@ -298,8 +298,6 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
 
   @Override
   public void periodic() {
-    arcadeDrive(-io.getDriverController().getRightStickX(), -io.getDriverController().getLeftStickY());
-
     if(io.getDriverController().isButtonPressed("A")) resetKalman();
 
     updateKalman();

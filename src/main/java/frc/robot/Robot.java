@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.*;
+import frc.robot.commands.*;
 import frc.robot.values.Values;
 
 /**
@@ -112,6 +113,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopInit() {
+    subsystemsInst.m_driveSubsystem.setDefaultCommand(new ArcadeDriveCommand());
   }
 
   /**
