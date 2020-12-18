@@ -113,7 +113,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopInit() {
-    subsystemsInst.m_driveSubsystem.setDefaultCommand(new ArcadeDriveCommand());
+    CommandScheduler.getInstance().setDefaultCommand(subsystemsInst.m_driveSubsystem, new ArcadeDriveCommand());
   }
 
   /**
