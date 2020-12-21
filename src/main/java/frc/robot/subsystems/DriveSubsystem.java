@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.SPI;
 import frc.robot.IO;
 import frc.robot.Robot;
+import frc.robot.commands.TurnToAngleCommand;
 import frc.robot.utils.Utils;
 import frc.robot.utils.kalman.BasicPosKalman;
 import frc.robot.values.LookupGenerator;
@@ -22,6 +23,7 @@ import frc.robot.values.LookupType;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.CANPIDController;
 
 import org.apache.commons.math3.linear.*;
 
@@ -42,10 +44,13 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
   private double prevL = 0.0;
   private double prevR = 0.0;
   
-  public CANSparkMax rightMaster;
-  public CANSparkMax rightSlave;
-  public CANSparkMax leftMaster;
-  public CANSparkMax leftSlave;
+  private CANSparkMax rightMaster;
+  private CANSparkMax rightSlave;
+  private CANSparkMax leftMaster;
+  private CANSparkMax leftSlave;
+
+  private CANPIDController rightController;
+  private CANPIDController leftController;
 
   private IO io;
 
@@ -85,6 +90,8 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
   private final double RPM_TO_FTPS = 0.002445;
   // conversion factor from RPM returned from encoders to mi/h
   private final double RPM_TO_MPH = 0.001667;
+  // conversion factor from revolutions returned from encoders to feet
+  private final double REV_TO_FT = 0.1467;
 
   public DriveSubsystem() {
     io = IO.getInstance();
@@ -104,6 +111,21 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
 
     leftMaster.setInverted(true);
     leftSlave.setInverted(true);
+
+    rightController = rightMaster.getPIDController();
+    // these are all completely made up and need to be tuned
+    rightController.setP(1.0e-2);
+    rightController.setI(0.0);
+    rightController.setD(0.0);
+    rightController.setOutputRange(-0.5, 0.5);
+    rightController.setClosedLoopRamprate(1.0);
+
+    leftController = leftMaster.getPIDController();
+    leftController.setP(1.0e-2);
+    leftController.setI(0.0);
+    leftController.setD(0.0);
+    leftController.setOutputRange(-0.5, 0.5);
+    leftController.setClosedLoopRamprate(1.0);
 
     LookupGenerator driveGenerator = new LookupGenerator(Double.parseDouble(Robot.m_values.getValue("driveDeadband")), Double.parseDouble(Robot.m_values.getValue("driveMinPower")));
     LookupGenerator turnGenerator = new LookupGenerator(Double.parseDouble(Robot.m_values.getValue("turnDeadband")), Double.parseDouble(Robot.m_values.getValue("turnMinPower")),
@@ -130,7 +152,6 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
     gyro = new AHRS(SPI.Port.kMXP);
     gyro.reset();
 
-    // angleOffset = gyro.getAngle();
   }
 
   //class convenience method to move the robot to save space in the different drive methods
@@ -219,10 +240,8 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
     avgAcc = ((r - prevR) + (l - prevL)) / 0.04;
 
     SmartDashboard.putNumber("rawAngle", gyro.getAngle() - angleOffset);
-    // SmartDashboard.putNumber("compass", gyro.getCompassHeading());
     double theta = (gyro.getAngle() - angleOffset) * (Math.PI / 180.0);
     SmartDashboard.putNumber("theta", theta);
-    // if(theta < 0.0) theta += (2.0 * Math.PI);
 
     // get the current position values and update them with the current velocity and acceleration readings
     double x = result[0][0];
@@ -235,13 +254,6 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
 
     x += (vx * 0.02) + (ax * 0.002);
     y += (vy * 0.02) + (ay * 0.002);
-
-    // SmartDashboard.putNumber("calcx", x);
-    // SmartDashboard.putNumber("calcy", y);
-    // SmartDashboard.putNumber("calcvx", vx);
-    // SmartDashboard.putNumber("calcvy", vy);
-    // SmartDashboard.putNumber("calcax", ax);
-    // SmartDashboard.putNumber("calcay", ay);
     
     RealMatrix xm = new Array2DRowRealMatrix(new double[][] {{x}, {y}, {vx}, {vy}, {ax}, {ay}}); // 3.14 / 120
     RealMatrix err = new Array2DRowRealMatrix(new double[][] {{0.16, 0.0, 0.0, 0.0, 0.0, 0.0},
@@ -294,6 +306,38 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
                                                                   {0.0, 0.0, 0.0, 0.2, 0.0, 0.0},
                                                                   {0.0, 0.0, 0.0, 0.0, 0.2, 0.0},
                                                                   {0.0, 0.0, 0.0, 0.0, 0.0, 0.2}});
+  }
+
+  public double[] getKalmanData() {
+    return kalman.getX().getData()[0];
+  }
+
+  // turns to the angle specified (in radian, absolute)
+  public void turnToAngle(double angle) {
+    // proprotional constant to multiply p by
+    double p = 1.0e-2;
+    // margin of error in revolutions
+    double moe = 0.01;
+    double theta = gyro.getAngle() / (Math.PI/180.0);
+    double error = (theta - angle) / (2.0 * Math.PI);;
+
+    while(Math.abs(error) > moe) {
+      // if error is positive, this will cause the robot to rotate clockwise, decreasing the angle
+      // if error is negative, this will cause the robot to rotate counterclockwise, increasing the angle
+      rightMaster.set(-p * error);
+      leftMaster.set(p * error);
+
+      theta = gyro.getAngle() / (Math.PI/180.0);
+      error = (theta - angle) / (2.0 * Math.PI);
+    }
+
+  }
+
+  // drives the specified distance in feet
+  public void driveDistance(double distance) {
+    distance *= REV_TO_FT;
+    rightController.setReference(distance, ControlType.kPosition);
+    leftController.setReference(distance, ControlType.kPosition);
   }
 
   @Override

@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 public class SubsystemsInstance {
     public DriveSubsystem m_driveSubsystem;
+    public NavigationSubsystem m_navSubsystem;
 
     private static SubsystemsInstance inst;
 
