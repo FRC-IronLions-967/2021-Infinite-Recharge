@@ -10,6 +10,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.ArrayList;
 import frc.robot.utils.navigation.*;
+import frc.robot.commands.*;
 
 public class NavigationSubsystem extends SubsystemBase {
   private boolean navEnabled = false;
@@ -38,13 +39,27 @@ public class NavigationSubsystem extends SubsystemBase {
     destinations.add(dest);
   }
 
+  // returns the nodes previously visited, in the order they were visited
+  public Node[] getTraveledPath() {
+    Node path[] =  new Node[nodeIndex];
+    for(int i = 0; i < nodeIndex; i++) path[i] = destinations.get(i);
+
+    return path;
+  }
+
+  public Node getCurNode() {
+    return curNode;
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
     if(navEnabled) {
       if(destinations.size() > nodeIndex) {
         CommandScheduler.getInstance().schedule(new TurnToAngleCommand(curNode.calcAngle(destinations.get(nodeIndex))));
-        
+        CommandScheduler.getInstance().schedule(new DriveDistanceCommand(curNode.calcDistance(destinations.getNode(nodeIndex))));
+        curNode = destinations.get(nodeIndex);
+
         nodeIndex++;
       }
     }

@@ -10,20 +10,19 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.SubsystemsInstance;
 
-public class TurnToAngleCommand extends CommandBase {
-
-  // the angle in radians to turn to (absolute, does not depend on current angle)
-  private double angle;
+public class DriveDistanceCommand extends CommandBase {
+  // distance (in feet) to drive
+  private double distance;
   private SubsystemsInstance inst;
   private boolean finished = false;
   /**
-   * Creates a new TurnToAngleCommand.
+   * Creates a new DriveDistanceCommand.
    */
-  public TurnToAngleCommand(double angle) {
+  public DriveDistanceCommand(double distance) {
     inst = SubsystemsInstance.getInstance();
     addRequirements(inst.m_driveSubsystem, inst.m_navSubsystem);
 
-    this.angle = angle;
+    this.distance = distance;
   }
 
   // Called when the command is initially scheduled.
@@ -34,7 +33,7 @@ public class TurnToAngleCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    inst.m_driveSubsystem.turnToAngle(angle);
+    inst.m_driveSubsystem.driveDistance(distance);
     finished = true;
   }
 
@@ -46,6 +45,6 @@ public class TurnToAngleCommand extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return finished;
+    return false;
   }
 }

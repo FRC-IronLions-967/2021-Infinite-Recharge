@@ -313,6 +313,7 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
   }
 
   // turns to the angle specified (in radian, absolute)
+  // the values here need to be tuned, Im guessing at them right now
   public void turnToAngle(double angle) {
     // proprotional constant to multiply p by
     double p = 1.0e-2;
