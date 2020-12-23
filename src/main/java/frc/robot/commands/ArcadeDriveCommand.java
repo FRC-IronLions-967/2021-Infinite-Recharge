@@ -21,6 +21,8 @@ public class ArcadeDriveCommand extends CommandBase {
   public ArcadeDriveCommand() {
     // Use addRequirements() here to declare subsystem dependencies.
     inst = SubsystemsInstance.getInstance();
+    addRequirements(inst.m_driveSubsystem);
+
     io = IO.getInstance();
   }
 

@@ -7,14 +7,16 @@
 
 package frc.robot.commands;
 
+import com.revrobotics.ControlType;
+
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.SubsystemsInstance;
 
 public class DriveDistanceCommand extends CommandBase {
-  // distance (in feet) to drive
   private double distance;
   private SubsystemsInstance inst;
   private boolean finished = false;
+
   /**
    * Creates a new DriveDistanceCommand.
    */
@@ -28,12 +30,19 @@ public class DriveDistanceCommand extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    System.out.println("Initializing DriveDistance");
+    // inst.m_driveSubsystem.driveDistance(distance);
+    // finished = true;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    inst.m_driveSubsystem.driveDistance(distance);
+    System.out.println("Driving distance");
+    
+    distance *= 0.1467;
+    inst.m_driveSubsystem.movePID(distance, distance, ControlType.kPosition);
+
     finished = true;
   }
 
@@ -45,6 +54,6 @@ public class DriveDistanceCommand extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return finished;
   }
 }

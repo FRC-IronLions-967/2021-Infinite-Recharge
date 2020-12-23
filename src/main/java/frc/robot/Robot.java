@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.*;
 import frc.robot.commands.*;
 import frc.robot.values.Values;
+import frc.robot.utils.navigation.*;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -87,9 +88,18 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
-    m_autoSelected = m_chooser.getSelected();
+    // m_autoSelected = m_chooser.getSelected();
     // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
-    System.out.println("Auto selected: " + m_autoSelected);
+    // System.out.println("Auto selected: " + m_autoSelected);
+
+    Node start = new Node(0.0, 0.0, NodeType.NAVIGATION);
+    Node test = new Node(3.0, 0.0, NodeType.NAVIGATION);
+
+    // subsystemsInst.m_navSubsystem.init();
+
+    subsystemsInst.m_navSubsystem.setNavEnabled(true);
+
+    subsystemsInst.m_navSubsystem.addDestination(test);
   }
 
   /**
@@ -97,15 +107,15 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousPeriodic() {
-    switch (m_autoSelected) {
-      case kCustomAuto:
-        // Put custom auto code here
-        break;
-      case kDefaultAuto:
-      default:
-        // Put default auto code here
-        break;
-    }
+    // switch (m_autoSelected) {
+    //   case kCustomAuto:
+    //     // Put custom auto code here
+    //     break;
+    //   case kDefaultAuto:
+    //   default:
+    //     // Put default auto code here
+    //     break;
+    // }
   }
 
   /**
