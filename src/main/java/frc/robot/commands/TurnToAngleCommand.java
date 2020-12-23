@@ -29,12 +29,36 @@ public class TurnToAngleCommand extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    System.out.println("Initializing TurnToAngle");
+    // inst.m_driveSubsystem.turnToAngle(angle);
+    // finished = true;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    inst.m_driveSubsystem.turnToAngle(angle);
+    System.out.println("Running turn to angle");
+    // proprotional constant to multiply p by
+    double p = 1.0e-3;
+    // margin of error in revolutions
+    double moe = 0.02;
+    double theta = inst.m_driveSubsystem.getGyroAngle() * (Math.PI/180.0);
+    double error = (theta - angle) / (2.0 * Math.PI);;
+
+    while(Math.abs(error) > moe) {
+      // if error is positive, this will cause the robot to rotate clockwise, decreasing the angle
+      // if error is negative, this will cause the robot to rotate counterclockwise, increasing the angle
+      System.out.println("Error: " + error);
+      System.out.println("Angle: " + angle);
+      System.out.println("Theta: " + theta);
+      // rightMaster.set(-p * error);
+      // leftMaster.set(p * error);
+      inst.m_driveSubsystem.move(-p * error, p * error);
+
+      theta = inst.m_driveSubsystem.getGyroAngle() * (Math.PI/180.0);
+      error = (theta - angle) / (2.0 * Math.PI);
+    }
+
     finished = true;
   }
 

@@ -8,6 +8,7 @@ public class SubsystemsInstance {
 
     private SubsystemsInstance() {
         m_driveSubsystem = new DriveSubsystem();
+        m_navSubsystem = new NavigationSubsystem();
     }
 
     public static SubsystemsInstance getInstance() {

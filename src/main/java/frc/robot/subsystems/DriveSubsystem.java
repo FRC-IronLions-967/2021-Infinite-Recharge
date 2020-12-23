@@ -22,6 +22,7 @@ import frc.robot.values.LookupGenerator;
 import frc.robot.values.LookupType;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANPIDController;
 
@@ -114,18 +115,24 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
 
     rightController = rightMaster.getPIDController();
     // these are all completely made up and need to be tuned
-    rightController.setP(1.0e-2);
+    rightController.setP(0.5);
     rightController.setI(0.0);
     rightController.setD(0.0);
     rightController.setOutputRange(-0.5, 0.5);
-    rightController.setClosedLoopRamprate(1.0);
+    rightMaster.setClosedLoopRampRate(1.0);
+    rightSlave.setClosedLoopRampRate(1.0);
+    rightMaster.getEncoder().setPositionConversionFactor(1.0);
+    rightSlave.getEncoder().setPositionConversionFactor(1.0);
 
     leftController = leftMaster.getPIDController();
-    leftController.setP(1.0e-2);
+    leftController.setP(0.5);
     leftController.setI(0.0);
     leftController.setD(0.0);
     leftController.setOutputRange(-0.5, 0.5);
-    leftController.setClosedLoopRamprate(1.0);
+    leftMaster.setClosedLoopRampRate(1.0);
+    leftSlave.setClosedLoopRampRate(1.0);
+    leftMaster.getEncoder().setPositionConversionFactor(1.0);
+    leftSlave.getEncoder().setPositionConversionFactor(1.0);
 
     LookupGenerator driveGenerator = new LookupGenerator(Double.parseDouble(Robot.m_values.getValue("driveDeadband")), Double.parseDouble(Robot.m_values.getValue("driveMinPower")));
     LookupGenerator turnGenerator = new LookupGenerator(Double.parseDouble(Robot.m_values.getValue("turnDeadband")), Double.parseDouble(Robot.m_values.getValue("turnMinPower")),
@@ -166,6 +173,11 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
     //set motor powers, slaves do not need to be called as they were set to follow the master in the class constructor
     rightMaster.set(r);
     leftMaster.set(l);
+  }
+
+  public void movePID(double r, double l, ControlType type) {
+    rightController.setReference(r, type);
+    leftController.setReference(l, type);
   }
 
   //method to be called from the arcade drive command
@@ -315,20 +327,24 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
   // turns to the angle specified (in radian, absolute)
   // the values here need to be tuned, Im guessing at them right now
   public void turnToAngle(double angle) {
+    System.out.println("Inside turnToAngle");
     // proprotional constant to multiply p by
-    double p = 1.0e-2;
+    double p = 1.0e-3;
     // margin of error in revolutions
-    double moe = 0.01;
-    double theta = gyro.getAngle() / (Math.PI/180.0);
+    double moe = 0.02;
+    double theta = gyro.getAngle() * (Math.PI/180.0);
     double error = (theta - angle) / (2.0 * Math.PI);;
 
     while(Math.abs(error) > moe) {
       // if error is positive, this will cause the robot to rotate clockwise, decreasing the angle
       // if error is negative, this will cause the robot to rotate counterclockwise, increasing the angle
+      System.out.println("Error: " + error);
+      System.out.println("Angle: " + angle);
+      System.out.println("Theta: " + theta);
       rightMaster.set(-p * error);
       leftMaster.set(p * error);
 
-      theta = gyro.getAngle() / (Math.PI/180.0);
+      theta = gyro.getAngle() * (Math.PI/180.0);
       error = (theta - angle) / (2.0 * Math.PI);
     }
 
@@ -336,9 +352,14 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
 
   // drives the specified distance in feet
   public void driveDistance(double distance) {
+    System.out.println("Inside driveDistance");
     distance *= REV_TO_FT;
     rightController.setReference(distance, ControlType.kPosition);
     leftController.setReference(distance, ControlType.kPosition);
+  }
+
+  public double getGyroAngle() {
+    return gyro.getAngle();
   }
 
   @Override
