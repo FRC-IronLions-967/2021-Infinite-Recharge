@@ -9,29 +9,34 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.SubsystemsInstance;
+import frc.robot.utils.navigation.*;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class TurnToAngleCommand extends CommandBase {
-
-  // the angle in radians to turn to (absolute, does not depend on current angle)
+  private Node start;
+  private Node end;
   private double angle;
+  private double moe;
   private SubsystemsInstance inst;
   private boolean finished = false;
   /**
    * Creates a new TurnToAngleCommand.
    */
-  public TurnToAngleCommand(double angle) {
+  public TurnToAngleCommand(Node start, Node end, double moe) {
     inst = SubsystemsInstance.getInstance();
     addRequirements(inst.m_driveSubsystem, inst.m_navSubsystem);
 
-    this.angle = angle;
+    this.start = start;
+    this.end = end;
+    this.moe = moe;
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
     System.out.println("Initializing TurnToAngle");
-    // inst.m_driveSubsystem.turnToAngle(angle);
-    // finished = true;
+
+    angle = start.calcAngle(end);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -41,18 +46,15 @@ public class TurnToAngleCommand extends CommandBase {
     // proprotional constant to multiply p by
     double p = 1.0e-3;
     // margin of error in revolutions
-    double moe = 0.02;
     double theta = inst.m_driveSubsystem.getGyroAngle() * (Math.PI/180.0);
     double error = (theta - angle) / (2.0 * Math.PI);;
 
     while(Math.abs(error) > moe) {
       // if error is positive, this will cause the robot to rotate clockwise, decreasing the angle
       // if error is negative, this will cause the robot to rotate counterclockwise, increasing the angle
-      System.out.println("Error: " + error);
-      System.out.println("Angle: " + angle);
-      System.out.println("Theta: " + theta);
-      // rightMaster.set(-p * error);
-      // leftMaster.set(p * error);
+      SmartDashboard.putNumber("Nav Angle Error", error);
+      SmartDashboard.putNumber("Nav Angle", angle);
+
       inst.m_driveSubsystem.move(-p * error, p * error);
 
       theta = inst.m_driveSubsystem.getGyroAngle() * (Math.PI/180.0);

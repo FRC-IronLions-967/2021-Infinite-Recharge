@@ -7,11 +7,11 @@
 
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.*;
 import java.util.ArrayList;
 import frc.robot.utils.navigation.*;
 import frc.robot.commands.*;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class NavigationSubsystem extends SubsystemBase {
   private boolean navEnabled = false;
@@ -20,11 +20,6 @@ public class NavigationSubsystem extends SubsystemBase {
   private ArrayList<Node> destinations;
   private int nodeIndex = 0;
 
-  private SubsystemsInstance inst;
-
-  private TurnToAngleCommand turn;
-  private DriveDistanceCommand drive;
-
   /**
    * Creates a new NavigationSubsystem.
    */
@@ -32,20 +27,13 @@ public class NavigationSubsystem extends SubsystemBase {
     destinations = new ArrayList<>();
     curNode = new Node(0.0, 0.0, NodeType.NAVIGATION);
 
-    // inst = SubsystemsInstance.getInstance();
   }
-
-  // public void init() {
-  //   inst = SubsystemsInstance.getInstance();
-  // }
 
   public boolean isNavEnabled() {
     return navEnabled;
   }
 
   public void setNavEnabled(boolean enabled) {
-    turn = new TurnToAngleCommand(0.0);
-    drive = new DriveDistanceCommand(0.0);
     navEnabled = enabled;
   }
 
@@ -70,27 +58,19 @@ public class NavigationSubsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     if(navEnabled) {
-      if(destinations.size() > nodeIndex) {
-        // System.out.println("Navigating to new node");
-        // inst.m_driveSubsystem.turnToAngle(curNode.calcAngle(destinations.get(nodeIndex)));
-        if(!CommandScheduler.getInstance().isScheduled(turn)) {
-          turn = new TurnToAngleCommand(curNode.calcAngle(destinations.get(nodeIndex)));
-        }
-        CommandScheduler.getInstance().schedule(false, turn);
-        // while(!turn.isFinished());
-        // System.out.println("Finished turn");
-        // inst.m_driveSubsystem.driveDistance(curNode.calcDistance(destinations.get(nodeIndex)));
-        if(!CommandScheduler.getInstance().isScheduled(turn)) {
-          drive = new DriveDistanceCommand(curNode.calcDistance(destinations.get(nodeIndex)));
-        }
-        CommandScheduler.getInstance().schedule(false, drive);
-        // while(!drive.isFinished());
-        // System.out.println("Finished driving");
-        if(drive.isFinished() && turn.isFinished()) {
-          curNode = destinations.get(nodeIndex);
 
-          nodeIndex++;
-        }
+      SmartDashboard.putNumber("nodeIndex", nodeIndex);
+
+      if(destinations.size() > nodeIndex) {
+        CommandScheduler.getInstance().schedule(false, new SequentialCommandGroup(new TurnToAngleCommand(curNode, destinations.get(nodeIndex), 0.03), new DriveDistanceCommand(curNode, destinations.get(nodeIndex), 0.03)));
+
+        // if the most recent command finish was a DriveDistanceCommand, then we have reached the next node, so increment nodeIndex
+        CommandScheduler.getInstance().onCommandFinish((Command c) -> {
+          if(c instanceof DriveDistanceCommand) {
+            curNode = destinations.get(nodeIndex);
+            nodeIndex++;
+          }
+        });
       }
     }
   }

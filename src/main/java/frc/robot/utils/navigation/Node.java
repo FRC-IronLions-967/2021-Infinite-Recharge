@@ -36,6 +36,7 @@ public class Node {
         double dx = x - otherNode.getX();
         double dy = y - otherNode.getY();
 
-        return Math.atan(dy/dx);
+        // these arguments might need to be reversed if this gives wrong angle measures
+        return Math.atan2(dy, dx);
     }
 }

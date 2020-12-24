@@ -239,6 +239,14 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
     return leftMaster.getEncoder().getVelocity() * RPM_TO_MPH;
   }
 
+  public double getRightCurrent() {
+    return rightMaster.getOutputCurrent();
+  }
+
+  public double getLeftCurrent() {
+    return leftMaster.getOutputCurrent();
+  }
+
   private void updateKalman() {
     double[][] result = kalman.getX().getData();
 
