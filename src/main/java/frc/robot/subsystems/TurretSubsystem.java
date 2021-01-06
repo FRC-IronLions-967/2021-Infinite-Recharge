@@ -10,7 +10,10 @@ package frc.robot.subsystems;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
+import com.revrobotics.CANDigitalInput.LimitSwitch;
+import com.revrobotics.CANDigitalInput.LimitSwitchPolarity;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.CANDigitalInput;
 import com.revrobotics.CANError;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -29,6 +32,16 @@ public class TurretSubsystem extends SubsystemBase {
   private CANPIDController leftController;
   private CANPIDController rightController;
 
+  private CANDigitalInput actuatorForward;
+  private CANDigitalInput actuatorReverse;
+  private CANDigitalInput rotForward;
+  private CANDigitalInput rotReverse;
+
+  private double actuatorSetpoint = 0.0;
+  private double turretSetpoint = 0.0;
+
+  private boolean initialized = false;
+
   /**
    * Creates a new TurretSubsystem.
    */
@@ -37,6 +50,16 @@ public class TurretSubsystem extends SubsystemBase {
     turretRot = new CANSparkMax(Integer.parseInt(Robot.m_robotMap.getValue("turretRot")), MotorType.kBrushless);
     leftFlywheel = new CANSparkMax(Integer.parseInt(Robot.m_robotMap.getValue("leftFlywheel")), MotorType.kBrushless);
     rightFlywheel = new CANSparkMax(Integer.parseInt(Robot.m_robotMap.getValue("rightFlywheel")), MotorType.kBrushless);
+
+    actuatorForward = linearActuator.getForwardLimitSwitch(LimitSwitchPolarity.kNormallyOpen);
+    actuatorReverse = linearActuator.getReverseLimitSwitch(LimitSwitchPolarity.kNormallyOpen);
+    rotForward = turretRot.getForwardLimitSwitch(LimitSwitchPolarity.kNormallyOpen);
+    rotReverse = turretRot.getReverseLimitSwitch(LimitSwitchPolarity.kNormallyOpen);
+
+    // actuatorForward.enableLimitSwitch(true);
+    // actuatorReverse.enableLimitSwitch(true);
+    // rotForward.enableLimitSwitch(true);
+    // rotReverse.enableLimitSwitch(true);
 
     leftFlywheel.setInverted(true);
     rightFlywheel.setInverted(false);
@@ -83,26 +106,60 @@ public class TurretSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Angle Setpoint", 0.0);
     SmartDashboard.putNumber("Turret Setpoint", 0.0);
     SmartDashboard.putNumber("Flywheel Setpoint", 0.0);
+
+  }
+
+  public void findActuatorReverseLimit() {
+    while(!actuatorReverse.get()) {
+      linearActuator.set(-0.05);
+    }
+    linearActuator.set(0.0);
+    actuatorController.setReference(linearActuator.getEncoder().getPosition(), ControlType.kPosition);
+    SmartDashboard.putNumber("Angle Setpoint", linearActuator.getEncoder().getPosition());
+
+    initialized = true;
   }
 
   @Override
   public void periodic() {
-    double angleSet = SmartDashboard.getNumber("Angle Setpoint", 0.0);
-    actuatorController.setReference(angleSet, ControlType.kPosition);
-    SmartDashboard.putNumber("Angle Revolutions", linearActuator.getEncoder().getPosition());
 
-    double turretSet = SmartDashboard.getNumber("Turret Setpoint", 0.0);
-    turretController.setReference(turretSet, ControlType.kPosition);
-    SmartDashboard.putNumber("Turret Revolutions", turretRot.getEncoder().getPosition());
-    SmartDashboard.putNumber("Turret RPM", turretRot.getEncoder().getVelocity());
+    if(initialized) {
+      double angleSet = SmartDashboard.getNumber("Angle Setpoint", 0.0);
+      // if(actuatorSetpoint - angleSet > 0 && !actuatorForward.get()) {
+      actuatorController.setReference(angleSet, ControlType.kPosition);
+      // } else if(actuatorSetpoint - angleSet < 0 && !actuatorReverse.get()) {
+      // actuatorController.setReference(angleSet, ControlType.kPosition);
+      // } else if(actuatorForward.get() || actuatorReverse.get()) {
+      // turretController.setReference(turretRot.getEncoder().getPosition(), ControlType.kPosition);
+      // }
+      SmartDashboard.putNumber("Angle Revolutions", linearActuator.getEncoder().getPosition());
+
+      double turretSet = SmartDashboard.getNumber("Turret Setpoint", 0.0);
+      // if(turretSetpoint - turretSet > 0 && !rotForward.get()) {
+      turretController.setReference(turretSet, ControlType.kPosition);
+      // } else if(turretSetpoint - turretSet < 0 && !rotReverse.get()) {
+      //   turretController.setReference(turretSet, ControlType.kPosition);
+      // } else if(rotForward.get() || rotReverse.get()) {
+      // turretController.setReference(turretRot.getEncoder().getPosition(), ControlType.kPosition);
+      // }
+      SmartDashboard.putNumber("Turret Revolutions", turretRot.getEncoder().getPosition());
+      SmartDashboard.putNumber("Turret RPM", turretRot.getEncoder().getVelocity());
     
-    double flywheelSet = SmartDashboard.getNumber("Flywheel Setpoint", 0.0);
-    leftController.setReference(flywheelSet, ControlType.kVelocity);
-    SmartDashboard.putNumber("Left RPM", leftFlywheel.getEncoder().getVelocity());
-    SmartDashboard.putNumber("Left Current", leftFlywheel.getOutputCurrent());
+      double flywheelSet = SmartDashboard.getNumber("Flywheel Setpoint", 0.0);
+      leftController.setReference(flywheelSet, ControlType.kVelocity);
+      SmartDashboard.putNumber("Left RPM", leftFlywheel.getEncoder().getVelocity());
+      SmartDashboard.putNumber("Left Current", leftFlywheel.getOutputCurrent());
 
-    rightController.setReference(flywheelSet, ControlType.kVelocity);
-    SmartDashboard.putNumber("Right RPM", rightFlywheel.getEncoder().getVelocity());
-    SmartDashboard.putNumber("Right Current", rightFlywheel.getOutputCurrent());
+      rightController.setReference(flywheelSet, ControlType.kVelocity);
+        SmartDashboard.putNumber("Right RPM", rightFlywheel.getEncoder().getVelocity());
+      SmartDashboard.putNumber("Right Current", rightFlywheel.getOutputCurrent());
+    } else {
+      findActuatorReverseLimit();
+    }
+
+    SmartDashboard.putBoolean("actuatorForward", actuatorForward.get());
+    SmartDashboard.putBoolean("actuatorReverse", actuatorReverse.get());
+    SmartDashboard.putBoolean("rotForward", rotForward.get());
+    SmartDashboard.putBoolean("rotReverse", rotReverse.get());
   }
 }
