@@ -37,10 +37,8 @@ public class TurretSubsystem extends SubsystemBase {
   private CANDigitalInput rotForward;
   private CANDigitalInput rotReverse;
 
-  private double actuatorSetpoint = 0.0;
-  private double turretSetpoint = 0.0;
-
-  private boolean initialized = false;
+  private boolean turretInitialized = false;
+  private boolean actuatorInitialized = false;
 
   /**
    * Creates a new TurretSubsystem.
@@ -56,13 +54,8 @@ public class TurretSubsystem extends SubsystemBase {
     rotForward = turretRot.getForwardLimitSwitch(LimitSwitchPolarity.kNormallyOpen);
     rotReverse = turretRot.getReverseLimitSwitch(LimitSwitchPolarity.kNormallyOpen);
 
-    // actuatorForward.enableLimitSwitch(true);
-    // actuatorReverse.enableLimitSwitch(true);
-    // rotForward.enableLimitSwitch(true);
-    // rotReverse.enableLimitSwitch(true);
-
-    leftFlywheel.setInverted(true);
-    rightFlywheel.setInverted(false);
+    leftFlywheel.setInverted(false);
+    rightFlywheel.setInverted(true);
 
     linearActuator.getEncoder().setPosition(0.0);
     linearActuator.getEncoder().setPositionConversionFactor(1.0);
@@ -92,14 +85,14 @@ public class TurretSubsystem extends SubsystemBase {
     turretController.setOutputRange(-0.40, 0.40);
 
     leftController.setP(1.0e-3);
-    leftController.setI(1.0e-7);
-    leftController.setD(1.0e-2);
+    leftController.setI(0.0e-7);
+    leftController.setD(0.0e-2);
     leftController.setReference(0.0, ControlType.kVelocity);
     leftController.setOutputRange(0.0, 1.0);
     
     rightController.setP(1.0e-3);
-    rightController.setI(1.0e-7);
-    rightController.setD(1.0e-2);
+    rightController.setI(0.0e-7);
+    rightController.setD(0.0e-2);
     rightController.setReference(0.0, ControlType.kVelocity);
     rightController.setOutputRange(0.0, 1.0);
 
@@ -109,52 +102,59 @@ public class TurretSubsystem extends SubsystemBase {
 
   }
 
-  public void findActuatorReverseLimit() {
+  public void initializeTurret() {
+    if(turretInitialized) return;
+    while(!rotReverse.get()) {
+      turretRot.set(-0.05);
+    }
+    turretRot.set(0.0);
+    turretRot.getEncoder().setPosition(0.0);
+    turretController.setReference(turretRot.getEncoder().getPosition(), ControlType.kPosition);
+    SmartDashboard.putNumber("Turret Setpoint", turretRot.getEncoder().getPosition());
+
+    turretInitialized = true;
+  }
+
+  public void initializeActuator() {
+    if(actuatorInitialized) return;
     while(!actuatorReverse.get()) {
       linearActuator.set(-0.05);
     }
     linearActuator.set(0.0);
-    actuatorController.setReference(linearActuator.getEncoder().getPosition(), ControlType.kPosition);
+    linearActuator.getEncoder().setPosition(0.0);
+    actuatorController.setReference(linearActuator.getEncoder().getPosition() + 10.0, ControlType.kPosition);
     SmartDashboard.putNumber("Angle Setpoint", linearActuator.getEncoder().getPosition());
 
-    initialized = true;
+    actuatorInitialized = true;
   }
 
   @Override
   public void periodic() {
 
-    if(initialized) {
+    if(turretInitialized && actuatorInitialized) {
       double angleSet = SmartDashboard.getNumber("Angle Setpoint", 0.0);
-      // if(actuatorSetpoint - angleSet > 0 && !actuatorForward.get()) {
       actuatorController.setReference(angleSet, ControlType.kPosition);
-      // } else if(actuatorSetpoint - angleSet < 0 && !actuatorReverse.get()) {
-      // actuatorController.setReference(angleSet, ControlType.kPosition);
-      // } else if(actuatorForward.get() || actuatorReverse.get()) {
-      // turretController.setReference(turretRot.getEncoder().getPosition(), ControlType.kPosition);
-      // }
       SmartDashboard.putNumber("Angle Revolutions", linearActuator.getEncoder().getPosition());
 
       double turretSet = SmartDashboard.getNumber("Turret Setpoint", 0.0);
-      // if(turretSetpoint - turretSet > 0 && !rotForward.get()) {
       turretController.setReference(turretSet, ControlType.kPosition);
-      // } else if(turretSetpoint - turretSet < 0 && !rotReverse.get()) {
-      //   turretController.setReference(turretSet, ControlType.kPosition);
-      // } else if(rotForward.get() || rotReverse.get()) {
-      // turretController.setReference(turretRot.getEncoder().getPosition(), ControlType.kPosition);
-      // }
       SmartDashboard.putNumber("Turret Revolutions", turretRot.getEncoder().getPosition());
       SmartDashboard.putNumber("Turret RPM", turretRot.getEncoder().getVelocity());
     
-      double flywheelSet = SmartDashboard.getNumber("Flywheel Setpoint", 0.0);
-      leftController.setReference(flywheelSet, ControlType.kVelocity);
-      SmartDashboard.putNumber("Left RPM", leftFlywheel.getEncoder().getVelocity());
-      SmartDashboard.putNumber("Left Current", leftFlywheel.getOutputCurrent());
+      // double flywheelSet = SmartDashboard.getNumber("Flywheel Setpoint", 0.0);
+      // double flywheelSet = 4000;
+      // leftController.setReference(flywheelSet, ControlType.kVelocity);
+      // SmartDashboard.putNumber("Left RPM", leftFlywheel.getEncoder().getVelocity());
+      // SmartDashboard.putNumber("Left Current", leftFlywheel.getOutputCurrent());
 
-      rightController.setReference(flywheelSet, ControlType.kVelocity);
-        SmartDashboard.putNumber("Right RPM", rightFlywheel.getEncoder().getVelocity());
-      SmartDashboard.putNumber("Right Current", rightFlywheel.getOutputCurrent());
+      // rightController.setReference(flywheelSet, ControlType.kVelocity);
+      // SmartDashboard.putNumber("Right RPM", rightFlywheel.getEncoder().getVelocity());
+      // SmartDashboard.putNumber("Right Current", rightFlywheel.getOutputCurrent());
+      leftFlywheel.set(1.0);
+      rightFlywheel.set(1.0);
     } else {
-      findActuatorReverseLimit();
+      initializeActuator();
+      initializeTurret();
     }
 
     SmartDashboard.putBoolean("actuatorForward", actuatorForward.get());
