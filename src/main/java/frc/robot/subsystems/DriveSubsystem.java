@@ -265,12 +265,12 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
     ax = result[4][0];
     ay = result[5][0];
 
-    SmartDashboard.putNumber("x", x);
-    SmartDashboard.putNumber("y", y);
-    SmartDashboard.putNumber("vx", vx);
-    SmartDashboard.putNumber("vy", vy);
-    SmartDashboard.putNumber("ax", ax);
-    SmartDashboard.putNumber("ay", ay);
+    // SmartDashboard.putNumber("x", x);
+    // SmartDashboard.putNumber("y", y);
+    // SmartDashboard.putNumber("vx", vx);
+    // SmartDashboard.putNumber("vy", vy);
+    // SmartDashboard.putNumber("ax", ax);
+    // SmartDashboard.putNumber("ay", ay);
   }
 
   // resets the kalman filter's values to 0, useful for getting rid of accumulated errors
@@ -300,7 +300,7 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
   public void periodic() {
     if(io.getDriverController().isButtonPressed("A")) resetKalman();
 
-    updateKalman();
+    // updateKalman();
   }
 
 }

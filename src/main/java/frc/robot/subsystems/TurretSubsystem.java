@@ -40,6 +40,11 @@ public class TurretSubsystem extends SubsystemBase {
   private boolean turretInitialized = false;
   private boolean actuatorInitialized = false;
 
+  private static final double MAX_LINEAR_ACTUATOR_POS = 180.0;
+  private static final double MAX_LINEAR_ACTUATOR_NEG = 0.0;
+  private static final double MAX_TURRET_POS = 48.0;
+  private static final double MAX_TURRET_NEG = -48.0;
+
   /**
    * Creates a new TurretSubsystem.
    */
@@ -84,15 +89,17 @@ public class TurretSubsystem extends SubsystemBase {
     turretController.setReference(0.0, ControlType.kPosition);
     turretController.setOutputRange(-0.40, 0.40);
 
-    leftController.setP(1.0e-3);
-    leftController.setI(0.0e-7);
-    leftController.setD(0.0e-2);
+    leftController.setP(4.0e-4);
+    leftController.setI(2.0e-7);
+    leftController.setD(0.0e-8);
+    // leftController.setFF(1.58e-4);
     leftController.setReference(0.0, ControlType.kVelocity);
     leftController.setOutputRange(0.0, 1.0);
     
-    rightController.setP(1.0e-3);
-    rightController.setI(0.0e-7);
-    rightController.setD(0.0e-2);
+    rightController.setP(4.0e-4);
+    rightController.setI(2.0e-7);
+    rightController.setD(0.0e-8);
+    // rightController.setFF(1.58e-4);
     rightController.setReference(0.0, ControlType.kVelocity);
     rightController.setOutputRange(0.0, 1.0);
 
@@ -109,8 +116,7 @@ public class TurretSubsystem extends SubsystemBase {
     }
     turretRot.set(0.0);
     turretRot.getEncoder().setPosition(0.0);
-    turretController.setReference(turretRot.getEncoder().getPosition(), ControlType.kPosition);
-    SmartDashboard.putNumber("Turret Setpoint", turretRot.getEncoder().getPosition());
+    turretController.setReference(12.0, ControlType.kPosition);
 
     turretInitialized = true;
   }
@@ -118,13 +124,15 @@ public class TurretSubsystem extends SubsystemBase {
   public void initializeActuator() {
     if(actuatorInitialized) return;
     while(!actuatorReverse.get()) {
-      linearActuator.set(-0.05);
+      linearActuator.set(-0.12);
     }
     linearActuator.set(0.0);
-    linearActuator.getEncoder().setPosition(0.0);
-    actuatorController.setReference(linearActuator.getEncoder().getPosition() + 10.0, ControlType.kPosition);
-    SmartDashboard.putNumber("Angle Setpoint", linearActuator.getEncoder().getPosition());
+    linearActuator.getEncoder().setPosition(-10.0);
+    actuatorController.setReference(0.0, ControlType.kPosition);
 
+    actuatorReverse.enableLimitSwitch(true);
+    actuatorForward.enableLimitSwitch(true);
+    
     actuatorInitialized = true;
   }
 
@@ -133,25 +141,37 @@ public class TurretSubsystem extends SubsystemBase {
 
     if(turretInitialized && actuatorInitialized) {
       double angleSet = SmartDashboard.getNumber("Angle Setpoint", 0.0);
+      angleSet = (angleSet > MAX_LINEAR_ACTUATOR_POS) ? MAX_LINEAR_ACTUATOR_POS : angleSet;
+      angleSet = (angleSet < MAX_LINEAR_ACTUATOR_NEG) ? MAX_LINEAR_ACTUATOR_NEG : angleSet;
       actuatorController.setReference(angleSet, ControlType.kPosition);
-      SmartDashboard.putNumber("Angle Revolutions", linearActuator.getEncoder().getPosition());
+      // SmartDashboard.putNumber("Angle Revolutions", linearActuator.getEncoder().getPosition());
 
       double turretSet = SmartDashboard.getNumber("Turret Setpoint", 0.0);
+      turretSet = (turretSet > MAX_TURRET_POS) ? MAX_TURRET_POS : turretSet;
+      turretSet = (turretSet < MAX_TURRET_NEG) ? MAX_TURRET_NEG : turretSet;
       turretController.setReference(turretSet, ControlType.kPosition);
-      SmartDashboard.putNumber("Turret Revolutions", turretRot.getEncoder().getPosition());
-      SmartDashboard.putNumber("Turret RPM", turretRot.getEncoder().getVelocity());
+      // SmartDashboard.putNumber("Turret Revolutions", turretRot.getEncoder().getPosition());
+      // SmartDashboard.putNumber("Turret RPM", turretRot.getEncoder().getVelocity());
     
-      // double flywheelSet = SmartDashboard.getNumber("Flywheel Setpoint", 0.0);
-      // double flywheelSet = 4000;
-      // leftController.setReference(flywheelSet, ControlType.kVelocity);
-      // SmartDashboard.putNumber("Left RPM", leftFlywheel.getEncoder().getVelocity());
-      // SmartDashboard.putNumber("Left Current", leftFlywheel.getOutputCurrent());
+      // double flywheelSet = SmartDashboard.getNumber("Flywheel Setpoint", 4200.0);
+      double flywheelSet = 5200.0;
+      CANError left = leftController.setReference(flywheelSet, ControlType.kVelocity);
+      if(!left.equals(CANError.kOk)) {
+        System.out.println(left.name());
+      }
+      SmartDashboard.putNumber("Left RPM", leftFlywheel.getEncoder().getVelocity());
+      SmartDashboard.putNumber("Left Current", leftFlywheel.getOutputCurrent());
+      SmartDashboard.putNumber("Left I accum", leftController.getIAccum());
 
-      // rightController.setReference(flywheelSet, ControlType.kVelocity);
-      // SmartDashboard.putNumber("Right RPM", rightFlywheel.getEncoder().getVelocity());
-      // SmartDashboard.putNumber("Right Current", rightFlywheel.getOutputCurrent());
-      leftFlywheel.set(1.0);
-      rightFlywheel.set(1.0);
+      CANError right = rightController.setReference(flywheelSet, ControlType.kVelocity);
+      if(!right.equals(CANError.kOk)) {
+        System.out.println(right.name());
+      }
+      SmartDashboard.putNumber("Right RPM", rightFlywheel.getEncoder().getVelocity());
+      SmartDashboard.putNumber("Right Current", rightFlywheel.getOutputCurrent());
+      SmartDashboard.putNumber("Right I accum", rightController.getIAccum());
+      // leftFlywheel.set(1.0);
+      // rightFlywheel.set(1.0);
     } else {
       initializeActuator();
       initializeTurret();
