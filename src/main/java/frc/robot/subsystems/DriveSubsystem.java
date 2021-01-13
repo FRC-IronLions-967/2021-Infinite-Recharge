@@ -300,7 +300,7 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
   public void periodic() {
     if(io.getDriverController().isButtonPressed("A")) resetKalman();
 
-    // updateKalman();
+    updateKalman();
   }
 
 }
