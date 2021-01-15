@@ -42,8 +42,8 @@ public class TurretSubsystem extends SubsystemBase {
 
   private static final double MAX_LINEAR_ACTUATOR_POS = 180.0;
   private static final double MAX_LINEAR_ACTUATOR_NEG = 0.0;
-  private static final double MAX_TURRET_POS = 96.0;
-  private static final double MAX_TURRET_NEG = 0.0;
+  private static final double MAX_TURRET_POS = 48.0;
+  private static final double MAX_TURRET_NEG = -48.0;
 
   /**
    * Creates a new TurretSubsystem.
@@ -104,7 +104,7 @@ public class TurretSubsystem extends SubsystemBase {
     rightController.setOutputRange(0.0, 1.0);
 
     SmartDashboard.putNumber("Angle Setpoint", 0.0);
-    SmartDashboard.putNumber("Turret Setpoint", 10.0);
+    SmartDashboard.putNumber("Turret Setpoint", 0.0);
     SmartDashboard.putNumber("Flywheel Setpoint", 0.0);
 
   }
@@ -115,8 +115,8 @@ public class TurretSubsystem extends SubsystemBase {
       turretRot.set(-0.05);
     }
     turretRot.set(0.0);
-    turretRot.getEncoder().setPosition(0.0);
-    turretController.setReference(12.0, ControlType.kPosition);
+    turretRot.getEncoder().setPosition(-48.0);
+    turretController.setReference(0.0, ControlType.kPosition);
 
     turretInitialized = true;
   }
