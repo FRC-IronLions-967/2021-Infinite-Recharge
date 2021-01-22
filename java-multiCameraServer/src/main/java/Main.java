@@ -28,6 +28,7 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.vision.VisionPipeline;
 import edu.wpi.first.vision.VisionThread;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import org.opencv.core.Mat;
 
@@ -330,6 +331,13 @@ public final class Main {
     CvSource imageSource = new CvSource("CV Image Source", VideoMode.PixelFormat.kMJPEG, 320, 240, 30);
     MjpegServer cvStream = new MjpegServer("CV Image Stream", 1186);
     cvStream.setSource(imageSource);
+
+    SmartDashboard.putNumber("minH", 0.0);
+    SmartDashboard.putNumber("maxH", 255.0);
+    SmartDashboard.putNumber("minS", 0.0);
+    SmartDashboard.putNumber("maxS", 255.0);
+    SmartDashboard.putNumber("minV", 0.0);
+    SmartDashboard.putNumber("maxV", 255.0);
 
     if (cameras.size() >= 1) {
       VisionThread visionThread = new VisionThread(cameras.get(0),
