@@ -10,49 +10,24 @@ import org.opencv.imgproc.*;
 public class TargetPipeline implements VisionPipeline {
   public static Mat drawing;
   public static volatile int val;
-  public static volatile double tx;
-  public static volatile double ty;
-  public static volatile double width;
-  public static volatile double height;
-  public static volatile double minH = 0.0;
-  public static volatile double maxH = 255.0;
-  public static volatile double minS = 0.0;
-  public static volatile double maxS = 255.0;
-  public static volatile double minV = 0.0;
-  public static volatile double maxV = 255.0;
-
-  public static final double WHITE_THRESH = 230.0;
+  public volatile double tx;
+  public volatile double ty;
+  public volatile double reliability;
+  public volatile double contourArea;
+  public volatile double area;
 
   public Mat result;
 
   @Override
   public void process(Mat mat) {
 
-    minH = SmartDashboard.getNumber("minH", minH);
-    maxH = SmartDashboard.getNumber("maxH", maxH);
-    minS = SmartDashboard.getNumber("minS", minS);
-    maxS = SmartDashboard.getNumber("maxS", maxS);
-    minV = SmartDashboard.getNumber("minV", minV);
-    maxV = SmartDashboard.getNumber("maxV", maxV);
-
     val++;
     
-    // Imgproc.cvtColor(mat, mat, Imgproc.COLOR_RGB2GRAY);
-    // Imgproc.cvtColor(mat, mat, Imgproc.COLOR_BGR2HSV);
-    for(int i = 0; i < mat.rows(); i++) {
-        for(int j = 0; j < mat.cols(); j++) {
-            double[] tmp = mat.get(i, j);
-            if(tmp[0] > WHITE_THRESH && tmp[1] > WHITE_THRESH && tmp[2] > WHITE_THRESH) {
-                mat.put(i, j, new double[] {0.0, 0.0, 0.0});
-            }
-        }
-    }
-    Core.extractChannel(mat, mat, 1);
+    Imgproc.cvtColor(mat, mat, Imgproc.COLOR_RGB2GRAY);
 
     Imgproc.blur(mat, mat, new Size(3, 3));
 
-    Imgproc.threshold(mat, mat, 240, 255, 0);
-    // Core.inRange(mat, new Scalar(minH, minS, minV), new Scalar(maxH, maxS, maxV), mat);
+    Imgproc.threshold(mat, mat, 230, 255, 0);
 
     Imgproc.Canny(mat, mat, 50, 200, 3, false);
 
@@ -80,26 +55,34 @@ public class TargetPipeline implements VisionPipeline {
   Rect bRect = new Rect();
 
   if (boundRects.length > 0) {
-      System.out.println("Finding bounding rectangles");
       int maxIndex = 0;
       for (int i = 0; i < boundRects.length; i++) {
           maxIndex = (boundRects[i].area() > boundRects[maxIndex].area()) ? i : maxIndex;
       }
-      Imgproc.rectangle(mat, boundRects[maxIndex].tl(), boundRects[maxIndex].br(), new Scalar(0, 0, 255));
+      contourArea = Imgproc.contourArea(contours.get(maxIndex));
       bRect = boundRects[maxIndex];
+      area = bRect.area();
+
+      if(contourArea / area < 0.20 && contourArea / area > 0.15) {
+        Imgproc.rectangle(mat, boundRects[maxIndex].tl(), boundRects[maxIndex].br(), new Scalar(0, 0, 255));
+        tx = ((double)bRect.tl().x - (((double)mat.cols() / 2.0) - (double)bRect.width / 2.0));
+        ty = ((((double)mat.rows() / 2.0) - (double)bRect.height / 2.0) - (double)bRect.tl().y);
+        reliability = (bRect.width >= 20) ? 1.0 : 0.0;
+      } else {
+        reliability = 0.0;
+      }
   }
 
-//   mat.copyTo(TargetPipeline.drawing);
   this.result = mat.clone();
 
-  double tx, ty; //pixels offset from center of image
+  // double tx, ty; //pixels offset from center of image
 
-    if (bRect.width != 0 && bRect.height != 0) {
-      tx = ((double)bRect.tl().x - (((double)mat.cols() / 2.0) - (double)bRect.width / 2.0));
-      ty = ((((double)mat.rows() / 2.0) - (double)bRect.height / 2.0) - (double)bRect.tl().y);
-      width = (double) bRect.width;
-      height = (double) bRect.height;
-      
-    }
+    // if (bRect.width != 0 && bRect.height != 0) {
+    //   tx = ((double)bRect.tl().x - (((double)mat.cols() / 2.0) - (double)bRect.width / 2.0));
+    //   ty = ((((double)mat.rows() / 2.0) - (double)bRect.height / 2.0) - (double)bRect.tl().y);
+    //   reliability = (bRect.width >= 20) ? 1.0 : 0.0;
+    // } else {
+    //   reliability = 0.0;
+    // }
     }
 }
