@@ -343,17 +343,20 @@ public final class Main {
       VisionThread visionThread = new VisionThread(cameras.get(0),
               new TargetPipeline(), pipeline -> {
         // do something with pipeline results
-        // NetworkTable visionTable = ntinst.getTable("vision");
-        // NetworkTableEntry tx = visionTable.getEntry("tx");
-        // NetworkTableEntry ty = visionTable.getEntry("ty");
-        // NetworkTableEntry reliability = visionTable.getEntry("reliability");
-        // NetworkTableEntry distanceEntry = visionTable.getEntry("dist");
-        // NetworkTableEntry offsetEntry = visionTable.getEntry("offset");
-        // tx.setDouble(pipeline.tx);
-        // ty.setDouble(pipeline.ty);
-        // reliability.setDouble(pipeline.reliability);
-        // distanceEntry.setDouble(TargetPipeline.dist);
-        // offsetEntry.setDouble(TargetPipeline.theta);
+        NetworkTable visionTable = ntinst.getTable("vision");
+        NetworkTableEntry tx = visionTable.getEntry("tx");
+        NetworkTableEntry ty = visionTable.getEntry("ty");
+        NetworkTableEntry reliability = visionTable.getEntry("reliability");
+        NetworkTableEntry height = visionTable.getEntry("height");
+        NetworkTableEntry width = visionTable.getEntry("width");
+        NetworkTableEntry area = visionTable.getEntry("area");
+        tx.setDouble(pipeline.tx);
+        ty.setDouble(pipeline.ty);
+        reliability.setDouble(pipeline.reliability);
+        height.setDouble(pipeline.height);
+        width.setDouble(pipeline.width);
+        area.setDouble(pipeline.area);
+
 
         System.out.println("tx: " + pipeline.tx + " ty: " + pipeline.ty + " contour: " + pipeline.contourArea + " area: " + pipeline.area);
 
