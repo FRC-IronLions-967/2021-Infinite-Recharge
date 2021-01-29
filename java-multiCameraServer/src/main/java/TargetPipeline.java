@@ -15,6 +15,8 @@ public class TargetPipeline implements VisionPipeline {
   public volatile double area;
   public volatile double height;
   public volatile double width;
+  public final double MIN_AREA_PROP = 0.12;
+  public final double MAX_AREA_PROP = 0.23;
 
   public volatile Mat result;
 
@@ -58,7 +60,7 @@ public class TargetPipeline implements VisionPipeline {
       bRect = boundRects[maxIndex];
       area = bRect.area();
 
-      if(contourArea / area < 0.20 && contourArea / area > 0.15) {
+      if(contourArea / area < MAX_AREA_PROP && contourArea / area > MIN_AREA_PROP) {
         Imgproc.rectangle(mat, boundRects[maxIndex].tl(), boundRects[maxIndex].br(), new Scalar(0, 0, 255));
         tx = ((double)bRect.tl().x - (((double)mat.cols() / 2.0) - (double)bRect.width / 2.0));
         ty = ((((double)mat.rows() / 2.0) - (double)bRect.height / 2.0) - (double)bRect.tl().y);

@@ -329,11 +329,11 @@ public final class Main {
 
     // start image processing on camera 0 if present
     CvSource targetImageSource = new CvSource("Target Image Source", VideoMode.PixelFormat.kMJPEG, 320, 240, 30);
-    CvSource lemonImageSource = new CvSource("Lemon Image Source", VideoMode.PixelFormat.kMJPEG, 320, 240, 30);
+    // CvSource lemonImageSource = new CvSource("Lemon Image Source", VideoMode.PixelFormat.kMJPEG, 320, 240, 30);
     MjpegServer cvTargetStream = new MjpegServer("Target Image Stream", 1186);
-    MjpegServer cvLemonStream = new MjpegServer("Lemon Image Stream", 1187);
+    // MjpegServer cvLemonStream = new MjpegServer("Lemon Image Stream", 1187);
     cvTargetStream.setSource(targetImageSource);
-    cvLemonStream.setSource(lemonImageSource);
+    // cvLemonStream.setSource(lemonImageSource);
 
     // SmartDashboard.putNumber("minH", 0.0);
     // SmartDashboard.putNumber("maxH", 255.0);
@@ -342,62 +342,66 @@ public final class Main {
     // SmartDashboard.putNumber("minV", 0.0);
     // SmartDashboard.putNumber("maxV", 255.0);
 
-    if (cameras.size() >= 2) {
-      VisionThread lemonThread = new VisionThread(cameras.get(0),
-              new LemonPipeline(), pipeline -> {
-        // do something with pipeline results
-        NetworkTable visionTable = ntinst.getTable("vision");
-        NetworkTableEntry tx = visionTable.getEntry("tx");
-        NetworkTableEntry ty = visionTable.getEntry("ty");
-        // NetworkTableEntry reliability = visionTable.getEntry("reliability");
-        NetworkTableEntry height = visionTable.getEntry("height");
-        NetworkTableEntry width = visionTable.getEntry("width");
-        NetworkTableEntry area = visionTable.getEntry("area");
-        tx.setDouble(pipeline.tx);
-        ty.setDouble(pipeline.ty);
-        // reliability.setDouble(pipeline.reliability);
-        height.setDouble(pipeline.height);
-        width.setDouble(pipeline.width);
-        area.setDouble(pipeline.area);
+    if (cameras.size() >= 1) {
+      // VisionThread lemonThread = new VisionThread(cameras.get(0),
+      //         new LemonPipeline(), pipeline -> {
+      //   // do something with pipeline results
+      //   NetworkTable visionTable = ntinst.getTable("vision");
+      //   NetworkTableEntry tx = visionTable.getEntry("tx");
+      //   NetworkTableEntry ty = visionTable.getEntry("ty");
+      //   // NetworkTableEntry reliability = visionTable.getEntry("reliability");
+      //   NetworkTableEntry height = visionTable.getEntry("height");
+      //   NetworkTableEntry width = visionTable.getEntry("width");
+      //   NetworkTableEntry area = visionTable.getEntry("area");
+      //   tx.setDouble(pipeline.tx);
+      //   ty.setDouble(pipeline.ty);
+      //   // reliability.setDouble(pipeline.reliability);
+      //   height.setDouble(pipeline.height);
+      //   width.setDouble(pipeline.width);
+      //   area.setDouble(pipeline.area);
 
 
-        // System.out.println("tx: " + pipeline.tx + " ty: " + pipeline.ty + " contour: " + pipeline.contourArea + " area: " + pipeline.area);
+      //   // System.out.println("tx: " + pipeline.tx + " ty: " + pipeline.ty + " contour: " + pipeline.contourArea + " area: " + pipeline.area);
 
-        lemonImageSource.putFrame(pipeline.result);
+      //   lemonImageSource.putFrame(pipeline.result);
 
-      });
+      // });
 
-      // VisionThread targetThread = new VisionThread(cameras.get(0),
-      //   new TargetPipeline(), pipeline -> {
-      //     NetworkTable visionTable = ntinst.getTable("vision");
-      //     NetworkTableEntry tx = visionTable.getEntry("tx");
-      //     NetworkTableEntry ty = visionTable.getEntry("ty");
-      //     NetworkTableEntry reliability = visionTable.getEntry("reliability");
-      //     NetworkTableEntry height = visionTable.getEntry("height");
-      //     NetworkTableEntry width = visionTable.getEntry("width");
-      //     NetworkTableEntry area = visionTable.getEntry("area");
-      //     tx.setDouble(pipeline.tx);
-      //     ty.setDouble(pipeline.ty);
-      //     reliability.setDouble(pipeline.reliability);
-      //     height.setDouble(pipeline.height);
-      //     width.setDouble(pipeline.width);
-      //     area.setDouble(pipeline.area);
+      VisionThread targetThread = new VisionThread(cameras.get(0),
+        new TargetPipeline(), pipeline -> {
+          NetworkTable visionTable = ntinst.getTable("vision");
+          NetworkTableEntry tx = visionTable.getEntry("tx");
+          NetworkTableEntry ty = visionTable.getEntry("ty");
+          NetworkTableEntry reliability = visionTable.getEntry("reliability");
+          NetworkTableEntry height = visionTable.getEntry("height");
+          NetworkTableEntry width = visionTable.getEntry("width");
+          NetworkTableEntry area = visionTable.getEntry("area");
+          tx.setDouble(pipeline.tx);
+          ty.setDouble(pipeline.ty);
+          reliability.setDouble(pipeline.reliability);
+          height.setDouble(pipeline.height);
+          width.setDouble(pipeline.width);
+          area.setDouble(pipeline.area);
           
           
-      //     // System.out.println("tx: " + pipeline.tx + " ty: " + pipeline.ty + " contour: " + pipeline.contourArea + " area: " + pipeline.area);
+          // System.out.println("tx: " + pipeline.tx + " ty: " + pipeline.ty + " contour: " + pipeline.contourArea + " area: " + pipeline.area);
           
-      //     targetImageSource.putFrame(pipeline.result);
+          targetImageSource.putFrame(pipeline.result);
           
-      //   });
+        });
         // do something with pipeline results
       /* something like this for GRIP:
       VisionThread visionThread = new VisionThread(cameras.get(0),
               new GripPipeline(), pipeline -> {
-        ...
+         ...
       });
        */
-      // targetThread.start();
-      lemonThread.start();
+      targetThread.start();
+
+      LEDThread ledThread = new LEDThread();
+      ledThread.start();
+      
+      // lemonThread.start();
 
       // CvSource imageSource = new CvSource("CV Image Source", VideoMode.PixelFormat.kMJPEG, 640, 480, 30);
       // MjpegServer cvStream = new MjpegServer("CV Image Stream", 1186);
