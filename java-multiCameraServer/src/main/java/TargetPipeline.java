@@ -15,6 +15,7 @@ public class TargetPipeline implements VisionPipeline {
   public volatile double area;
   public volatile double height;
   public volatile double width;
+  public volatile boolean hasTarget = false;
   public final double MIN_AREA_PROP = 0.12;
   public final double MAX_AREA_PROP = 0.23;
 
@@ -49,9 +50,9 @@ public class TargetPipeline implements VisionPipeline {
       boundRects[i] = Imgproc.boundingRect(contoursPoly[i]);
     }
 
-  Rect bRect = new Rect();
+    Rect bRect = new Rect();
 
-  if (boundRects.length > 0) {
+    if (boundRects.length > 0) {
       int maxIndex = 0;
       for (int i = 0; i < boundRects.length; i++) {
           maxIndex = (boundRects[i].area() > boundRects[maxIndex].area()) ? i : maxIndex;
@@ -68,11 +69,13 @@ public class TargetPipeline implements VisionPipeline {
         width = (double) bRect.width;
         area = bRect.area();
         reliability = (bRect.width >= 20) ? 1.0 : 0.0;
+        hasTarget = true;
       } else {
         reliability = 0.0;
+        hasTarget = false;
       }
-  }
-
-  this.result = mat.clone();
     }
+
+    this.result = mat.clone();
+  }
 }

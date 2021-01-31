@@ -19,18 +19,7 @@ public class LemonPipeline implements VisionPipeline {
     public void process(Mat mat) {
         val++;
   
-        // Imgproc.cvtColor(mat, mat, Imgproc.COLOR_BGR2HSV);
-  
-        //inRange(mat, Scalar(0, 127, 127), Scalar(15, 255, 255), mat); //tracks red
         Core.inRange(mat, new Scalar(0, 50, 50), new Scalar(40, 235, 235), mat);
-
-        // this.result = mat.clone();
-  
-        // Imgproc.erode(mat, mat, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(5, 5)));
-        // Imgproc.dilate(mat, mat, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(5, 5)));
-  
-        // Imgproc.dilate(mat, mat, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(5, 5)));
-        // Imgproc.erode(mat, mat, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(5, 5)));
   
         Imgproc.Canny(mat, mat, 100, 200, 3, false);
   

@@ -335,12 +335,7 @@ public final class Main {
     cvTargetStream.setSource(targetImageSource);
     // cvLemonStream.setSource(lemonImageSource);
 
-    // SmartDashboard.putNumber("minH", 0.0);
-    // SmartDashboard.putNumber("maxH", 255.0);
-    // SmartDashboard.putNumber("minS", 0.0);
-    // SmartDashboard.putNumber("maxS", 255.0);
-    // SmartDashboard.putNumber("minV", 0.0);
-    // SmartDashboard.putNumber("maxV", 255.0);
+    NetworkTable visionTable = ntinst.getTable("vision");
 
     if (cameras.size() >= 1) {
       // VisionThread lemonThread = new VisionThread(cameras.get(0),
@@ -369,20 +364,30 @@ public final class Main {
 
       VisionThread targetThread = new VisionThread(cameras.get(0),
         new TargetPipeline(), pipeline -> {
-          NetworkTable visionTable = ntinst.getTable("vision");
-          NetworkTableEntry tx = visionTable.getEntry("tx");
-          NetworkTableEntry ty = visionTable.getEntry("ty");
-          NetworkTableEntry reliability = visionTable.getEntry("reliability");
-          NetworkTableEntry height = visionTable.getEntry("height");
-          NetworkTableEntry width = visionTable.getEntry("width");
-          NetworkTableEntry area = visionTable.getEntry("area");
+          NetworkTable pipelineTable = visionTable.getSubTable("target");
+          
+          NetworkTableEntry tx = pipelineTable.getEntry("tx");
+          NetworkTableEntry ty = pipelineTable.getEntry("ty");
+          NetworkTableEntry reliability = pipelineTable.getEntry("reliability");
+          NetworkTableEntry height = pipelineTable.getEntry("height");
+          NetworkTableEntry width = pipelineTable.getEntry("width");
+          NetworkTableEntry area = pipelineTable.getEntry("area");
+          NetworkTableEntry hasTarget = pipelineTable.getEntry("hasTarget");
+
           tx.setDouble(pipeline.tx);
           ty.setDouble(pipeline.ty);
           reliability.setDouble(pipeline.reliability);
           height.setDouble(pipeline.height);
           width.setDouble(pipeline.width);
           area.setDouble(pipeline.area);
-          
+          hasTarget.setBoolean(pipeline.hasTarget);
+
+          // need to come up with a way to do this, but right now just push 0 to the table
+          NetworkTableEntry dist = pipelineTable.getEntry("dist");
+          NetworkTableEntry angleOffset = pipelineTable.getEntry("angleOffset");
+
+          dist.setDouble(0.0);
+          angleOffset.setDouble(0.0);
           
           // System.out.println("tx: " + pipeline.tx + " ty: " + pipeline.ty + " contour: " + pipeline.contourArea + " area: " + pipeline.area);
           
