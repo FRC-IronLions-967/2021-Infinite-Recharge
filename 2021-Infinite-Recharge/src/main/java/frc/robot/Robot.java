@@ -31,6 +31,7 @@ public class Robot extends TimedRobot {
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
   public static Values m_values;
   public static Values m_robotMap;
+  public static Values m_pidValues;
   private SubsystemsInstance subsystemsInst;
 
   /**
@@ -51,6 +52,7 @@ public class Robot extends TimedRobot {
     try {
       m_values = new Values("/home/lvuser/deploy/values.properties");
       m_robotMap = new Values("/home/lvuser/deploy/robotMap.properties");
+      m_pidValues = new Values("/home/lvuser/deploy/pidConst.properties");
     } catch (IOException e) {
       e.printStackTrace();
     }

@@ -58,4 +58,12 @@ public class Values {
     public String getValue(String key) {
         return prop.getProperty(key);
     }
+
+    public double getDoubleValue(String key) {
+        return Double.parseDouble(prop.getProperty(key));
+    }
+
+    public int getIntValue(String key) {
+        return Integer.parseInt(prop.getProperty(key));
+    }
 }
