@@ -33,6 +33,7 @@ public class Robot extends TimedRobot {
   public static Values m_robotMap;
   public static Values m_pidValues;
   private SubsystemsInstance subsystemsInst;
+  private IO ioInst;
 
   /**
    * This function is run when the robot is first started up and should be
@@ -47,7 +48,7 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("scale", 0.5d);
     SmartDashboard.putNumber("zeroTurn", 0.5d);
 
-    IO.getInstance();
+    ioInst = IO.getInstance();
 
     try {
       m_values = new Values("/home/lvuser/deploy/values.properties");
@@ -115,7 +116,15 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopInit() {
+
+    // initialize default commands for subsystems
+    // probably will also initialize controls here
     CommandScheduler.getInstance().setDefaultCommand(subsystemsInst.m_driveSubsystem, new ArcadeDriveCommand());
+
+    ioInst.getManipulatorController().whenButtonPressed("A", new RPMPresetCommand(m_values.getDoubleValue("defaultPresetOne")));
+    ioInst.getManipulatorController().whenButtonPressed("B", new RPMPresetCommand(m_values.getDoubleValue("defaultPresetTwo")));
+    ioInst.getManipulatorController().whenButtonPressed("LBUMP", new RPMDownCommand());
+    ioInst.getManipulatorController().whenButtonPressed("RBUMP", new RPMUpCommand());
   }
 
   /**
