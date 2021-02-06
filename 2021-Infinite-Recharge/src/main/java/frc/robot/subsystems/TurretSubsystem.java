@@ -15,8 +15,10 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANDigitalInput;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
+import frc.robot.commands.*;
 import frc.robot.values.CustomVisionValues;
 
 public class TurretSubsystem extends SubsystemBase {
@@ -181,8 +183,7 @@ public class TurretSubsystem extends SubsystemBase {
       }
 
     } else {
-      initializeActuator();
-      initializeTurret();
+      CommandScheduler.getInstance().schedule(new InitializeActuatorCommand(), new InitializeTurretCommand());
     }
 
   }
