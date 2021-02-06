@@ -45,10 +45,10 @@ public class TurretSubsystem extends SubsystemBase {
   // if false, the subsystem will use angles manually set by the user
   private boolean autoTrackEnabled = false;
 
-  private static final double MAX_LINEAR_ACTUATOR_POS = 180.0;
-  private static final double MAX_LINEAR_ACTUATOR_NEG = 0.0;
-  private static final double MAX_TURRET_POS = 48.0;
-  private static final double MAX_TURRET_NEG = -48.0;
+  private final double MAX_LINEAR_ACTUATOR_POS;
+  private final double MAX_LINEAR_ACTUATOR_NEG;
+  private final double MAX_TURRET_POS;
+  private final double MAX_TURRET_NEG;
 
   /**
    * Creates a new TurretSubsystem.
@@ -88,6 +88,12 @@ public class TurretSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Turret Setpoint", 0.0);
 
     visionValues = new CustomVisionValues("target");
+
+    MAX_LINEAR_ACTUATOR_POS = Robot.m_values.getDoubleValue("maxLinearActuatorPos");
+    MAX_LINEAR_ACTUATOR_NEG = Robot.m_values.getDoubleValue("maxLinearActuatorNeg");
+
+    MAX_TURRET_POS = Robot.m_values.getDoubleValue("maxTurretPos");
+    MAX_TURRET_NEG = Robot.m_values.getDoubleValue("maxTurretNeg");
 
   }
 
