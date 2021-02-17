@@ -152,10 +152,9 @@ public class TurretSubsystem extends SubsystemBase {
     if(Math.abs(newAngle) > MAX_TURRET_POS) newAngle %= MAX_TURRET_POS;
     if(newAngle < MAX_TURRET_NEG) newAngle += MAX_TURRET_POS;
 
-    double dif = newAngle - turretSet;
-    turretSet += dif;
+    turretSet = newAngle;
 
-    turretController.setReference(dif * DEG_TO_ROT, ControlType.kPosition);
+    turretController.setReference(turretSet * DEG_TO_ROT, ControlType.kPosition);
   }
 
   @Override

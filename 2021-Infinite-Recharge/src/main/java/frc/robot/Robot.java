@@ -121,15 +121,7 @@ public class Robot extends TimedRobot {
     // probably will also initialize controls here
     CommandScheduler.getInstance().setDefaultCommand(subsystemsInst.m_driveSubsystem, new ArcadeDriveCommand());
 
-    ioInst.getManipulatorController().whenButtonPressed("A", new RPMPresetCommand(m_values.getDoubleValue("defaultPresetOne")));
-    ioInst.getManipulatorController().whenButtonPressed("B", new RPMPresetCommand(m_values.getDoubleValue("defaultPresetTwo")));
-    ioInst.getManipulatorController().whenButtonPressed("X", new ToggleFeedCommand());
-    ioInst.getManipulatorController().whenButtonPressed("Y", new ToggleLEDCommand());
-    ioInst.getManipulatorController().whenButtonPressed("LBUMP", new RPMDownCommand());
-    ioInst.getManipulatorController().whenButtonPressed("RBUMP", new RPMUpCommand());
-    ioInst.getManipulatorController().whenPOVButtonPressed("W", new ToggleIntakeCommand());
-    ioInst.getManipulatorController().whenPOVButtonPressed("N", new ChangeAngleCommand(10.0));
-    ioInst.getManipulatorController().whenPOVButtonPressed("S", new ChangeAngleCommand(-10.0));
+    ioInst.teleopInit();
   }
 
   /**

@@ -14,8 +14,6 @@ package frc.robot.utils.kalman;
 
 import org.apache.commons.math3.linear.*;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
 public class BasicPosKalman {
     // state matrix
     private RealMatrix x;

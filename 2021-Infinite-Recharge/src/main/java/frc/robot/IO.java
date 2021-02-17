@@ -1,6 +1,7 @@
 package frc.robot;
 
 import frc.robot.utils.controls.XBoxController;
+import frc.robot.commands.*;
 
 public class IO {
     private static IO instance;
@@ -19,8 +20,17 @@ public class IO {
         return instance;
     }
 
-    public void telopInit() {
-
+    // this function should be run inside the Robot.teleopInit() function, and can assign commands or perform other control initialization routines
+    public void teleopInit() {
+        manipulatorController.whenButtonPressed("A", new RPMPresetCommand(Robot.m_values.getDoubleValue("defaultPresetOne")));
+        manipulatorController.whenButtonPressed("B", new RPMPresetCommand(Robot.m_values.getDoubleValue("defaultPresetTwo")));
+        manipulatorController.whenButtonPressed("X", new ToggleFeedCommand());
+        manipulatorController.whenButtonPressed("Y", new ToggleLEDCommand());
+        manipulatorController.whenButtonPressed("LBUMP", new RPMDownCommand());
+        manipulatorController.whenButtonPressed("RBUMP", new RPMUpCommand());
+        manipulatorController.whenPOVButtonPressed("W", new ToggleIntakeCommand());
+        manipulatorController.whenPOVButtonPressed("N", new ChangeAngleCommand(10.0));
+        manipulatorController.whenPOVButtonPressed("S", new ChangeAngleCommand(-10.0));
     }
 
     public XBoxController getDriverController() {

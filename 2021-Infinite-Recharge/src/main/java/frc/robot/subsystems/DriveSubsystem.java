@@ -10,7 +10,6 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.SPI;
 import frc.robot.IO;
@@ -26,7 +25,7 @@ import org.apache.commons.math3.linear.*;
 import com.kauailabs.navx.frc.AHRS;
 
 
-public class DriveSubsystem extends SubsystemBase implements Subsystem {
+public class DriveSubsystem extends SubsystemBase {
   /**
    * Creates a new DriveSubsystem.
    */
