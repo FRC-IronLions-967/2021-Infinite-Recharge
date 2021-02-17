@@ -52,6 +52,8 @@ public class TurretSubsystem extends SubsystemBase {
   private final double MAX_TURRET_POS;
   private final double MAX_TURRET_NEG;
 
+  private final double DEG_TO_ROT;
+
   /**
    * Creates a new TurretSubsystem.
    */
@@ -97,6 +99,8 @@ public class TurretSubsystem extends SubsystemBase {
 
     MAX_TURRET_POS = Robot.m_values.getDoubleValue("maxTurretPos");
     MAX_TURRET_NEG = Robot.m_values.getDoubleValue("maxTurretNeg");
+
+    DEG_TO_ROT = Robot.m_values.getDoubleValue("turretDegToRot");
 
   }
 
@@ -144,6 +148,16 @@ public class TurretSubsystem extends SubsystemBase {
     angleSet += delta;
   }
 
+  public void moveTurret(double newAngle) {
+    if(Math.abs(newAngle) > MAX_TURRET_POS) newAngle %= MAX_TURRET_POS;
+    if(newAngle < MAX_TURRET_NEG) newAngle += MAX_TURRET_POS;
+
+    double dif = newAngle - turretSet;
+    turretSet += dif;
+
+    turretController.setReference(dif * DEG_TO_ROT, ControlType.kPosition);
+  }
+
   @Override
   public void periodic() {
 
@@ -180,7 +194,8 @@ public class TurretSubsystem extends SubsystemBase {
         // angleSet = SmartDashboard.getNumber("Angle Setpoint", 0.0);
         actuatorController.setReference(angleSet, ControlType.kPosition);
 
-        // turretSet = SmartDashboard.getNumber("Turret Setpoint", 0.0);
+        double newAngle = SmartDashboard.getNumber("Turret Setpoint", turretSet);
+        moveTurret(newAngle);
         // turretSet = (turretSet > MAX_TURRET_POS) ? MAX_TURRET_POS : turretSet;
         // turretSet = (turretSet < MAX_TURRET_NEG) ? MAX_TURRET_NEG : turretSet;
         // turretController.setReference(turretSet, ControlType.kPosition);
