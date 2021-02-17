@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
@@ -19,11 +21,14 @@ public class ShooterSubsystem extends SubsystemBase {
 
   private CANSparkMax leftFlywheel;
   private CANSparkMax rightFlywheel;
+  private TalonSRX feedWheel;
 
   private CANPIDController leftController;
   private CANPIDController rightController;
 
   private IO ioInst;
+
+  private boolean feederOn = false;
 
   private double targetRPM;
   private final double maxRPM;
@@ -32,9 +37,11 @@ public class ShooterSubsystem extends SubsystemBase {
   public ShooterSubsystem() {
     leftFlywheel = new CANSparkMax(Integer.parseInt(Robot.m_robotMap.getValue("leftFlywheel")), MotorType.kBrushless);
     rightFlywheel = new CANSparkMax(Integer.parseInt(Robot.m_robotMap.getValue("rightFlywheel")), MotorType.kBrushless);
+    feedWheel = new TalonSRX(Robot.m_robotMap.getIntValue("feedWheel"));
 
     leftFlywheel.setInverted(false);
     rightFlywheel.setInverted(true);
+    feedWheel.setInverted(false);
 
     leftFlywheel.setClosedLoopRampRate(2.0);
     rightFlywheel.setClosedLoopRampRate(2.0);
@@ -75,6 +82,10 @@ public class ShooterSubsystem extends SubsystemBase {
     return maxRPM;
   }
 
+  public void toggleFeeder() {
+    feederOn = (feederOn) ? false : true;
+  }
+
   @Override
   public void periodic() {
 
@@ -85,6 +96,15 @@ public class ShooterSubsystem extends SubsystemBase {
       leftController.setReference(0.0, ControlType.kVelocity);
       rightController.setReference(0.0, ControlType.kVelocity);
     }
+
+    // if(ioInst.getManipulatorController().isButtonPressed("X")) {
+      if(feederOn) {
+      feedWheel.set(ControlMode.PercentOutput, 1.0);
+    } else {
+      feedWheel.set(ControlMode.PercentOutput, 0.0);
+    }
+
+    SmartDashboard.putNumber("Flywheel Setpoint", targetRPM);
 
   }
 }

@@ -88,8 +88,9 @@ public class TurretSubsystem extends SubsystemBase {
 
     SmartDashboard.putNumber("Angle Setpoint", 0.0);
     SmartDashboard.putNumber("Turret Setpoint", 0.0);
+    SmartDashboard.putBoolean("Auto Tracking", false);
 
-    visionValues = new CustomVisionValues("target");
+    // visionValues = new CustomVisionValues("target");
 
     MAX_LINEAR_ACTUATOR_POS = Robot.m_values.getDoubleValue("maxLinearActuatorPos");
     MAX_LINEAR_ACTUATOR_NEG = Robot.m_values.getDoubleValue("maxLinearActuatorNeg");
@@ -137,54 +138,61 @@ public class TurretSubsystem extends SubsystemBase {
     autoTrackEnabled = false;
   }
 
+  public void changeAngle(double delta) {
+    angleSet = (angleSet > MAX_LINEAR_ACTUATOR_POS) ? MAX_LINEAR_ACTUATOR_POS : angleSet;
+    angleSet = (angleSet < MAX_LINEAR_ACTUATOR_NEG) ? MAX_LINEAR_ACTUATOR_NEG : angleSet;
+    angleSet += delta;
+  }
+
   @Override
   public void periodic() {
 
-    if(turretInitialized && actuatorInitialized) {
+    if(/*turretInitialized &&*/ actuatorInitialized) {
 
       // this seems bad but idk
-      if(autoTrackEnabled) {
-        if(visionValues.hasTarget()) {
-          // both constants here are arbitrary and need to be tuned
-          // the first is the acceptable margin of error in tx, and the second is checking to see if tx has actually changed before telling the turret to move more
-            if(Math.abs(visionValues.getTX()) > 3.0 && Math.abs(visionValues.getTX()) - Math.abs(prevTx) < -2.0) {
-              // need to double check that tx is actually signed
-              // this constant is also arbitrary and will need to be tuned
-              // this may also end up being related to distance as well, and may need to factor that in
-              // this should turn by ~7.5° per pixel of offset
-              turretSet += visionValues.getTX() * 2.0;
-              turretController.setReference(turretSet, ControlType.kPosition);
-            }
-          } else {
-            // we don't have a target in sight, so move the turret within its range of motion to find one
-            if(!visionValues.hasTarget()) {
-              if(!rotReverse.get()) {
-                turretRot.set(-0.05);
-              } else if(!rotForward.get()) {
-                turretRot.set(0.05);
-              } else {
-                turretRot.set(0.0);
-              }
-            }
-          }
+      // if(autoTrackEnabled) {
+      //   if(visionValues.hasTarget()) {
+      //     // both constants here are arbitrary and need to be tuned
+      //     // the first is the acceptable margin of error in tx, and the second is checking to see if tx has actually changed before telling the turret to move more
+      //       if(Math.abs(visionValues.getTX()) > 3.0 && Math.abs(visionValues.getTX()) - Math.abs(prevTx) < -2.0) {
+      //         // need to double check that tx is actually signed
+      //         // this constant is also arbitrary and will need to be tuned
+      //         // this may also end up being related to distance as well, and may need to factor that in
+      //         // this should turn by ~7.5° per pixel of offset
+      //         turretSet += visionValues.getTX() * 2.0;
+      //         turretController.setReference(turretSet, ControlType.kPosition);
+      //       }
+      //     } else {
+      //       // we don't have a target in sight, so move the turret within its range of motion to find one
+      //       if(!visionValues.hasTarget()) {
+      //         if(!rotReverse.get()) {
+      //           turretRot.set(-0.05);
+      //         } else if(!rotForward.get()) {
+      //           turretRot.set(0.05);
+      //         } else {
+      //           turretRot.set(0.0);
+      //         }
+      //       }
+      //     }
 
-      } else {
+      // } else {
 
-        angleSet = SmartDashboard.getNumber("Angle Setpoint", 0.0);
-        angleSet = (angleSet > MAX_LINEAR_ACTUATOR_POS) ? MAX_LINEAR_ACTUATOR_POS : angleSet;
-        angleSet = (angleSet < MAX_LINEAR_ACTUATOR_NEG) ? MAX_LINEAR_ACTUATOR_NEG : angleSet;
+        // angleSet = SmartDashboard.getNumber("Angle Setpoint", 0.0);
         actuatorController.setReference(angleSet, ControlType.kPosition);
 
-        turretSet = SmartDashboard.getNumber("Turret Setpoint", 0.0);
-        turretSet = (turretSet > MAX_TURRET_POS) ? MAX_TURRET_POS : turretSet;
-        turretSet = (turretSet < MAX_TURRET_NEG) ? MAX_TURRET_NEG : turretSet;
-        turretController.setReference(turretSet, ControlType.kPosition);
+        // turretSet = SmartDashboard.getNumber("Turret Setpoint", 0.0);
+        // turretSet = (turretSet > MAX_TURRET_POS) ? MAX_TURRET_POS : turretSet;
+        // turretSet = (turretSet < MAX_TURRET_NEG) ? MAX_TURRET_NEG : turretSet;
+        // turretController.setReference(turretSet, ControlType.kPosition);
 
-      }
+      // }
 
     } else {
-      CommandScheduler.getInstance().schedule(new InitializeActuatorCommand(), new InitializeTurretCommand());
+      CommandScheduler.getInstance().schedule(new InitializeActuatorCommand()/*, new InitializeTurretCommand()*/);
+      // initializeActuator();
     }
 
+
+    // autoTrackEnabled = SmartDashboard.getBoolean("Auto Tracking", false);
   }
 }

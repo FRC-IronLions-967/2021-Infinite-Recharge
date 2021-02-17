@@ -77,8 +77,8 @@ public class DriveSubsystem extends SubsystemBase implements Subsystem {
     rightMaster.setInverted(true);
     rightSlave.setInverted(true);
 
-    leftMaster.setInverted(true);
-    leftSlave.setInverted(true);
+    leftMaster.setInverted(false);
+    leftSlave.setInverted(false);
 
     SURFACE_SCALE_FACTOR = Double.parseDouble(Robot.m_values.getValue("tileScaleFactor"));
 

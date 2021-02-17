@@ -17,7 +17,7 @@ public class TargetPipeline implements VisionPipeline {
   public volatile double width;
   public volatile boolean hasTarget = false;
   public final double MIN_AREA_PROP = 0.12;
-  public final double MAX_AREA_PROP = 0.23;
+  public final double MAX_AREA_PROP = 0.27;
 
   public volatile Mat result;
 
@@ -68,7 +68,7 @@ public class TargetPipeline implements VisionPipeline {
         height = (double) bRect.height;
         width = (double) bRect.width;
         area = bRect.area();
-        reliability = (bRect.width >= 20) ? 1.0 : 0.0;
+        reliability = (width > 15.0) ? 1.0 : 0.0;
         hasTarget = true;
       } else {
         reliability = 0.0;

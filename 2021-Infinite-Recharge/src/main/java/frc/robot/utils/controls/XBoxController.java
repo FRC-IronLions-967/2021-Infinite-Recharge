@@ -39,11 +39,10 @@ public class XBoxController extends Joystick {
         buttonMap.put("SELECT", new JoystickButton(this, 7));
         buttonMap.put("START", new JoystickButton(this, 8));
 
-        Iterator buttonIterator = buttonMap.entrySet().iterator();
-        while(buttonIterator.hasNext()) {
-            JoystickButton button = (JoystickButton) buttonIterator.next();
+        for(int i = 1; i <= 8; i++) {
+            JoystickButton button = new JoystickButton(this, i);
             button.whenPressed(new DoNothingCommand());
-            button.whenPressed(new DoNothingCommand());
+            button.whenReleased(new DoNothingCommand());
         }
 
         //initialize the POV buttons (the buttons on the dpad of the controller)
@@ -57,11 +56,10 @@ public class XBoxController extends Joystick {
         povMap.put("W", new POVButton(this, 270));
         povMap.put("NW", new POVButton(this, 315));
 
-        Iterator povIterator = povMap.entrySet().iterator();
-        while(povIterator.hasNext()) {
-            POVButton button = (POVButton) povIterator.next();
+        for(int i = 0; i <= 315; i += 45) {
+            POVButton button = new POVButton(this, i);
             button.whenPressed(new DoNothingCommand());
-            button.whenPressed(new DoNothingCommand());
+            button.whenReleased(new DoNothingCommand());
         }
     }
 

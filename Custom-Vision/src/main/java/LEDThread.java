@@ -24,18 +24,25 @@ public class LEDThread extends Thread {
 
     @Override
     public void run() {
-        Runtime rt = Runtime.getRuntime();
-        if(ledEntry.getBoolean(true)) {
-            try {
-                rt.exec("gpio write 0 1");
-            } catch (IOException e) {
-                DriverStation.reportError(e.getMessage(), true);
-            }
-        } else {
-            try {
-                rt.exec("gpio write 0 0");
-            } catch (IOException e) {
-                DriverStation.reportError(e.getMessage(), true);
+        for(;;) {
+
+            ledEntry = visionTable.getEntry("ledOn");
+
+            // System.out.println(ledEntry.getBoolean(true));
+
+            Runtime rt = Runtime.getRuntime();
+            if(ledEntry.getBoolean(true)) {
+                try {
+                    rt.exec("gpio write 0 1");
+                } catch (IOException e) {
+                    DriverStation.reportError(e.getMessage(), true);
+                }
+            } else {
+                try {
+                    rt.exec("gpio write 0 0");
+                } catch (IOException e) {
+                    DriverStation.reportError(e.getMessage(), true);
+                }
             }
         }
     }
