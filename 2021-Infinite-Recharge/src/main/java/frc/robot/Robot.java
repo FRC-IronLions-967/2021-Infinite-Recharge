@@ -7,15 +7,13 @@
 
 package frc.robot;
 
-import java.io.IOException;
-
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.*;
 import frc.robot.commands.*;
-import frc.robot.values.Values;
+import frc.robot.values.ValuesInstance;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -29,11 +27,9 @@ public class Robot extends TimedRobot {
   private static final String kCustomAuto = "My Auto";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
-  public static Values m_values;
-  public static Values m_robotMap;
-  public static Values m_pidValues;
   private SubsystemsInstance subsystemsInst;
   private IO ioInst;
+  private ValuesInstance valInst;
 
   /**
    * This function is run when the robot is first started up and should be
@@ -50,13 +46,7 @@ public class Robot extends TimedRobot {
 
     ioInst = IO.getInstance();
 
-    try {
-      m_values = new Values("/home/lvuser/deploy/values.properties");
-      m_robotMap = new Values("/home/lvuser/deploy/robotMap.properties");
-      m_pidValues = new Values("/home/lvuser/deploy/pidConst.properties");
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    valInst = ValuesInstance.getInstance();
 
     subsystemsInst = SubsystemsInstance.getInstance();
   }

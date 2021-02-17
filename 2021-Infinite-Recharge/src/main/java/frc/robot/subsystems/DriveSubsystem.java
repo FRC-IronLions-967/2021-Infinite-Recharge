@@ -13,9 +13,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.SPI;
 import frc.robot.IO;
-import frc.robot.Robot;
 import frc.robot.utils.Utils;
 import frc.robot.utils.kalman.BasicPosKalman;
+import frc.robot.values.ValuesInstance;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -45,6 +45,7 @@ public class DriveSubsystem extends SubsystemBase {
   public CANSparkMax leftSlave;
 
   private IO io;
+  private ValuesInstance valInst;
 
   private BasicPosKalman kalman;
 
@@ -62,12 +63,13 @@ public class DriveSubsystem extends SubsystemBase {
 
   public DriveSubsystem() {
     io = IO.getInstance();
+    valInst = ValuesInstance.getInstance();
 
     //Assigns the robot IDs from the robotMap.properties file
-    rightMaster = new CANSparkMax(Integer.parseInt(Robot.m_robotMap.getValue("rightMaster")), MotorType.kBrushless);
-    rightSlave = new CANSparkMax(Integer.parseInt(Robot.m_robotMap.getValue("rightSlave")), MotorType.kBrushless);
-    leftMaster = new CANSparkMax(Integer.parseInt(Robot.m_robotMap.getValue("leftMaster")), MotorType.kBrushless);
-    leftSlave = new CANSparkMax(Integer.parseInt(Robot.m_robotMap.getValue("leftSlave")), MotorType.kBrushless);
+    rightMaster = new CANSparkMax(Integer.parseInt(valInst.m_robotMap.getValue("rightMaster")), MotorType.kBrushless);
+    rightSlave = new CANSparkMax(Integer.parseInt(valInst.m_robotMap.getValue("rightSlave")), MotorType.kBrushless);
+    leftMaster = new CANSparkMax(Integer.parseInt(valInst.m_robotMap.getValue("leftMaster")), MotorType.kBrushless);
+    leftSlave = new CANSparkMax(Integer.parseInt(valInst.m_robotMap.getValue("leftSlave")), MotorType.kBrushless);
 
     //set slaves to follow master motor controllers
     rightSlave.follow(rightMaster);
@@ -79,12 +81,12 @@ public class DriveSubsystem extends SubsystemBase {
     leftMaster.setInverted(false);
     leftSlave.setInverted(false);
 
-    SURFACE_SCALE_FACTOR = Double.parseDouble(Robot.m_values.getValue("tileScaleFactor"));
+    SURFACE_SCALE_FACTOR = Double.parseDouble(valInst.m_values.getValue("tileScaleFactor"));
 
-    RPM_TO_FTPS = Double.parseDouble(Robot.m_values.getValue("rpmToFeetPerSecond"));
-    RPM_TO_MPH = Double.parseDouble(Robot.m_values.getValue("rpmToMilesPerHour"));
+    RPM_TO_FTPS = Double.parseDouble(valInst.m_values.getValue("rpmToFeetPerSecond"));
+    RPM_TO_MPH = Double.parseDouble(valInst.m_values.getValue("rpmToMilesPerHour"));
 
-    MAX = Double.parseDouble(Robot.m_values.getValue("maxOutput"));
+    MAX = Double.parseDouble(valInst.m_values.getValue("maxOutput"));
 
     RealMatrix init = new Array2DRowRealMatrix(new double[][] {{0}, {0}, {0}, {0}, {0}, {0}});
     RealMatrix initErr = new Array2DRowRealMatrix(new double[][] {{0.01, 0.0, 0.0, 0.0, 0.0, 0.0},

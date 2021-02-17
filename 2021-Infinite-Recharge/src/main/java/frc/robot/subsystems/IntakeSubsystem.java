@@ -9,8 +9,8 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.IO;
-import frc.robot.Robot;
 import frc.robot.utils.controls.XBoxController;
+import frc.robot.values.ValuesInstance;
 
 public class IntakeSubsystem extends SubsystemBase {
 
@@ -19,14 +19,17 @@ public class IntakeSubsystem extends SubsystemBase {
   private TalonSRX frontBelt;
 
   private IO ioInst;
+  private ValuesInstance valInst;
 
   private boolean intakeOn = false;
 
   /** Creates a new IntakeSubsystem. */
   public IntakeSubsystem() {
-    intakeRoller = new TalonSRX(Robot.m_robotMap.getIntValue("intakeRoller"));
-    rearBelt = new TalonSRX(Robot.m_robotMap.getIntValue("rearBelt"));
-    frontBelt = new TalonSRX(Robot.m_robotMap.getIntValue("frontBelt"));
+    valInst = ValuesInstance.getInstance();
+
+    intakeRoller = new TalonSRX(valInst.m_robotMap.getIntValue("intakeRoller"));
+    rearBelt = new TalonSRX(valInst.m_robotMap.getIntValue("rearBelt"));
+    frontBelt = new TalonSRX(valInst.m_robotMap.getIntValue("frontBelt"));
 
     intakeRoller.setInverted(true);
     rearBelt.setInverted(false);

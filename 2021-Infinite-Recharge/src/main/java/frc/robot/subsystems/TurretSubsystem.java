@@ -17,11 +17,13 @@ import com.revrobotics.CANDigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Robot;
 import frc.robot.commands.*;
 import frc.robot.values.CustomVisionValues;
+import frc.robot.values.ValuesInstance;
 
 public class TurretSubsystem extends SubsystemBase {
+  private ValuesInstance valInst;
+
   private CANSparkMax linearActuator;
   private CANSparkMax turretRot;
 
@@ -62,8 +64,10 @@ public class TurretSubsystem extends SubsystemBase {
    * Creates a new TurretSubsystem.
    */
   public TurretSubsystem() {
-    linearActuator = new CANSparkMax(Integer.parseInt(Robot.m_robotMap.getValue("linearActuator")), MotorType.kBrushless);
-    turretRot = new CANSparkMax(Integer.parseInt(Robot.m_robotMap.getValue("turretRot")), MotorType.kBrushless);
+    valInst = ValuesInstance.getInstance();
+
+    linearActuator = new CANSparkMax(Integer.parseInt(valInst.m_robotMap.getValue("linearActuator")), MotorType.kBrushless);
+    turretRot = new CANSparkMax(Integer.parseInt(valInst.m_robotMap.getValue("turretRot")), MotorType.kBrushless);
 
     actuatorForward = linearActuator.getForwardLimitSwitch(LimitSwitchPolarity.kNormallyOpen);
     actuatorReverse = linearActuator.getReverseLimitSwitch(LimitSwitchPolarity.kNormallyOpen);
@@ -80,33 +84,33 @@ public class TurretSubsystem extends SubsystemBase {
     actuatorController = linearActuator.getPIDController();
     turretController = turretRot.getPIDController();
 
-    actuatorController.setP(Robot.m_pidValues.getDoubleValue("actuatorP"));
-    actuatorController.setI(Robot.m_pidValues.getDoubleValue("actuatorI"));
-    actuatorController.setD(Robot.m_pidValues.getDoubleValue("actuatorD"));
+    actuatorController.setP(valInst.m_pidValues.getDoubleValue("actuatorP"));
+    actuatorController.setI(valInst.m_pidValues.getDoubleValue("actuatorI"));
+    actuatorController.setD(valInst.m_pidValues.getDoubleValue("actuatorD"));
     actuatorController.setReference(0.0, ControlType.kPosition);
-    actuatorController.setOutputRange(Robot.m_pidValues.getDoubleValue("actuatorMin"), Robot.m_pidValues.getDoubleValue("actuatorMax"));
+    actuatorController.setOutputRange(valInst.m_pidValues.getDoubleValue("actuatorMin"), valInst.m_pidValues.getDoubleValue("actuatorMax"));
 
-    turretController.setP(Robot.m_pidValues.getDoubleValue("turretP"));
-    turretController.setI(Robot.m_pidValues.getDoubleValue("turretI"));
-    turretController.setD(Robot.m_pidValues.getDoubleValue("turretD"));
+    turretController.setP(valInst.m_pidValues.getDoubleValue("turretP"));
+    turretController.setI(valInst.m_pidValues.getDoubleValue("turretI"));
+    turretController.setD(valInst.m_pidValues.getDoubleValue("turretD"));
     turretController.setReference(0.0, ControlType.kPosition);
-    turretController.setOutputRange(Robot.m_pidValues.getDoubleValue("turretMin"), Robot.m_pidValues.getDoubleValue("turretMax"));
+    turretController.setOutputRange(valInst.m_pidValues.getDoubleValue("turretMin"), valInst.m_pidValues.getDoubleValue("turretMax"));
 
     SmartDashboard.putNumber("Angle Setpoint", 0.0);
     SmartDashboard.putNumber("Turret Setpoint", 0.0);
     SmartDashboard.putBoolean("Auto Tracking", false);
 
-    // visionValues = new CustomVisionValues("target");
+    visionValues = new CustomVisionValues("target");
     targetTimeout = 0;
 
-    MAX_LINEAR_ACTUATOR_POS = Robot.m_values.getDoubleValue("maxLinearActuatorPos");
-    MAX_LINEAR_ACTUATOR_NEG = Robot.m_values.getDoubleValue("maxLinearActuatorNeg");
+    MAX_LINEAR_ACTUATOR_POS = valInst.m_values.getDoubleValue("maxLinearActuatorPos");
+    MAX_LINEAR_ACTUATOR_NEG = valInst.m_values.getDoubleValue("maxLinearActuatorNeg");
 
-    MAX_TURRET_POS = Robot.m_values.getDoubleValue("maxTurretPos");
-    MAX_TURRET_NEG = Robot.m_values.getDoubleValue("maxTurretNeg");
+    MAX_TURRET_POS = valInst.m_values.getDoubleValue("maxTurretPos");
+    MAX_TURRET_NEG = valInst.m_values.getDoubleValue("maxTurretNeg");
 
-    DEG_TO_ROT = Robot.m_values.getDoubleValue("turretDegToRot");
-    ROT_TO_DEG = Robot.m_values.getDoubleValue("turretRotToDeg");
+    DEG_TO_ROT = valInst.m_values.getDoubleValue("turretDegToRot");
+    ROT_TO_DEG = valInst.m_values.getDoubleValue("turretRotToDeg");
   }
 
   public void initializeTurret() {

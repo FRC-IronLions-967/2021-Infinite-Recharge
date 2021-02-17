@@ -14,8 +14,8 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.IO;
-import frc.robot.Robot;
 import frc.robot.utils.controls.XBoxController;
+import frc.robot.values.ValuesInstance;
 
 public class ShooterSubsystem extends SubsystemBase {
 
@@ -27,6 +27,7 @@ public class ShooterSubsystem extends SubsystemBase {
   private CANPIDController rightController;
 
   private IO ioInst;
+  private ValuesInstance valInst;
 
   private boolean feederOn = false;
 
@@ -35,9 +36,12 @@ public class ShooterSubsystem extends SubsystemBase {
   
   /** Creates a new ShooterSubsystem. */
   public ShooterSubsystem() {
-    leftFlywheel = new CANSparkMax(Integer.parseInt(Robot.m_robotMap.getValue("leftFlywheel")), MotorType.kBrushless);
-    rightFlywheel = new CANSparkMax(Integer.parseInt(Robot.m_robotMap.getValue("rightFlywheel")), MotorType.kBrushless);
-    feedWheel = new TalonSRX(Robot.m_robotMap.getIntValue("feedWheel"));
+    ioInst = IO.getInstance();
+    valInst = ValuesInstance.getInstance();
+
+    leftFlywheel = new CANSparkMax(Integer.parseInt(valInst.m_robotMap.getValue("leftFlywheel")), MotorType.kBrushless);
+    rightFlywheel = new CANSparkMax(Integer.parseInt(valInst.m_robotMap.getValue("rightFlywheel")), MotorType.kBrushless);
+    feedWheel = new TalonSRX(valInst.m_robotMap.getIntValue("feedWheel"));
 
     leftFlywheel.setInverted(false);
     rightFlywheel.setInverted(true);
@@ -49,24 +53,22 @@ public class ShooterSubsystem extends SubsystemBase {
     leftController = leftFlywheel.getPIDController();
     rightController = rightFlywheel.getPIDController();
 
-    leftController.setP(Robot.m_pidValues.getDoubleValue("lFlyP"));
-    leftController.setI(Robot.m_pidValues.getDoubleValue("lFlyI"));
-    leftController.setD(Robot.m_pidValues.getDoubleValue("lFlyD"));
+    leftController.setP(valInst.m_pidValues.getDoubleValue("lFlyP"));
+    leftController.setI(valInst.m_pidValues.getDoubleValue("lFlyI"));
+    leftController.setD(valInst.m_pidValues.getDoubleValue("lFlyD"));
     leftController.setReference(0.0, ControlType.kVelocity);
-    leftController.setOutputRange(Robot.m_pidValues.getDoubleValue("lFlyMin"), Robot.m_pidValues.getDoubleValue("lFlyMax"));
+    leftController.setOutputRange(valInst.m_pidValues.getDoubleValue("lFlyMin"), valInst.m_pidValues.getDoubleValue("lFlyMax"));
     
-    rightController.setP(Robot.m_pidValues.getDoubleValue("rFlyP"));
-    rightController.setI(Robot.m_pidValues.getDoubleValue("rFlyI"));
-    rightController.setD(Robot.m_pidValues.getDoubleValue("rFlyD"));
+    rightController.setP(valInst.m_pidValues.getDoubleValue("rFlyP"));
+    rightController.setI(valInst.m_pidValues.getDoubleValue("rFlyI"));
+    rightController.setD(valInst.m_pidValues.getDoubleValue("rFlyD"));
     rightController.setReference(0.0, ControlType.kVelocity);
-    rightController.setOutputRange(Robot.m_pidValues.getDoubleValue("rFlyMin"), Robot.m_pidValues.getDoubleValue("rFlyMax"));
+    rightController.setOutputRange(valInst.m_pidValues.getDoubleValue("rFlyMin"), valInst.m_pidValues.getDoubleValue("rFlyMax"));
 
-    targetRPM = Robot.m_values.getDoubleValue("defaultTargetRPM");
-    maxRPM = Robot.m_values.getDoubleValue("maxShooterRPM");
+    targetRPM = valInst.m_values.getDoubleValue("defaultTargetRPM");
+    maxRPM = valInst.m_values.getDoubleValue("maxShooterRPM");
 
     SmartDashboard.putNumber("Flywheel Setpoint", 0.0);
-
-    ioInst = IO.getInstance();
   }
 
   // sets the rpm that the flywheel will target when it is told to activate

@@ -1,6 +1,7 @@
 package frc.robot;
 
 import frc.robot.utils.controls.XBoxController;
+import frc.robot.values.ValuesInstance;
 import frc.robot.commands.*;
 
 public class IO {
@@ -22,8 +23,12 @@ public class IO {
 
     // this function should be run inside the Robot.teleopInit() function, and can assign commands or perform other control initialization routines
     public void teleopInit() {
-        manipulatorController.whenButtonPressed("A", new RPMPresetCommand(Robot.m_values.getDoubleValue("defaultPresetOne")));
-        manipulatorController.whenButtonPressed("B", new RPMPresetCommand(Robot.m_values.getDoubleValue("defaultPresetTwo")));
+        ValuesInstance valInst = ValuesInstance.getInstance();
+
+        if(!ValuesInstance.isInitialized()) throw new RuntimeException("Error loading values for teleopInit() of IO");
+
+        manipulatorController.whenButtonPressed("A", new RPMPresetCommand(valInst.m_values.getDoubleValue("defaultPresetOne")));
+        manipulatorController.whenButtonPressed("B", new RPMPresetCommand(valInst.m_values.getDoubleValue("defaultPresetTwo")));
         manipulatorController.whenButtonPressed("X", new ToggleFeedCommand());
         manipulatorController.whenButtonPressed("Y", new ToggleLEDCommand());
         manipulatorController.whenButtonPressed("LBUMP", new RPMDownCommand());
