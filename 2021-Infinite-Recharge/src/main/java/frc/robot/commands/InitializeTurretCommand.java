@@ -25,6 +25,7 @@ public class InitializeTurretCommand extends CommandBase {
   @Override
   public void execute() {
     inst.m_turretSubsystem.initializeTurret();
+    inst.m_turretSubsystem.initializeActuator();
     done = true;
   }
 

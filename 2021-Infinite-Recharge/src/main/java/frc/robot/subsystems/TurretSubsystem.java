@@ -52,6 +52,8 @@ public class TurretSubsystem extends SubsystemBase {
   // if false, the subsystem will use angles manually set by the user
   private boolean autoTrackEnabled = false;
 
+  private boolean hitMax = false;
+
   private final double MAX_LINEAR_ACTUATOR_POS;
   private final double MAX_LINEAR_ACTUATOR_NEG;
   private final double MAX_TURRET_POS;
@@ -115,14 +117,20 @@ public class TurretSubsystem extends SubsystemBase {
 
   public void initializeTurret() {
     if(turretInitialized) return;
-    while(!rotReverse.get()) {
-      turretRot.set(-0.05);
+    while(!rotForward.get()) {
+      turretRot.set(0.1);
     }
     turretRot.set(0.0);
-    turretRot.getEncoder().setPosition(-48.0);
-    turretController.setReference(0.0, ControlType.kPosition);
+    turretRot.getEncoder().setPosition(450.0);
+    turretController.setReference(450.0, ControlType.kPosition);
+
+    SmartDashboard.putNumber("Turret Setpoint", 360.0);
+
+    rotReverse.enableLimitSwitch(false);
+    rotForward.enableLimitSwitch(false);
 
     turretInitialized = true;
+    System.out.println("Turret Initialized");
   }
 
   public void initializeActuator() {
@@ -138,6 +146,7 @@ public class TurretSubsystem extends SubsystemBase {
     actuatorForward.enableLimitSwitch(true);
     
     actuatorInitialized = true;
+    System.out.println("Actuator Initialized");
   }
 
   public void enableAutoTracking() {
@@ -147,6 +156,8 @@ public class TurretSubsystem extends SubsystemBase {
   public void disableAutoTracking() {
     turretRot.set(0.0);
     turretSet = turretRot.getEncoder().getPosition() * ROT_TO_DEG;
+    turretController.setOutputRange(valInst.m_pidValues.getDoubleValue("turretMin"), valInst.m_pidValues.getDoubleValue("turretMax"));
+    turretController.setReference(turretSet, ControlType.kPosition);
     SmartDashboard.putNumber("Turret Setpoint", turretSet);
     autoTrackEnabled = false;
   }
@@ -168,35 +179,60 @@ public class TurretSubsystem extends SubsystemBase {
     turretSet = newAngle;
 
     turretController.setReference(turretSet * DEG_TO_ROT, ControlType.kPosition);
+    System.out.println(turretSet * DEG_TO_ROT);
   }
 
   @Override
   public void periodic() {
 
     if(turretInitialized && actuatorInitialized) {
+      System.out.println("Inside initialized part");
 
       // this seems bad but idk
       if(autoTrackEnabled) {
+        turretController.setOutputRange(0.0, 0.0);
+
         if(visionValues.hasTarget()) {
           targetTimeout = 0;
           // both constants here are arbitrary and need to be tuned
           // the first is the acceptable margin of error in tx, and the second is checking to see if tx has actually changed before telling the turret to move more
-            if(Math.abs(visionValues.getTX()) > 3.0 && Math.abs(visionValues.getTX()) - Math.abs(prevTx) < -2.0) {
+            if(Math.abs(visionValues.getTX()) > 5.0/* && Math.abs(visionValues.getTX()) - Math.abs(prevTx) < -2.0*/) {
               // need to double check that tx is actually signed
               // this constant is also arbitrary and will need to be tuned
               // this may also end up being related to distance as well, and may need to factor that in
               // this should turn by ~7.5° per pixel of offset
-              turretSet += visionValues.getTX() * 2.0;
-              turretController.setReference(turretSet, ControlType.kPosition);
+              // turretSet += visionValues.getTX() * 2.0;
+              if(Math.abs(visionValues.getTX()) < 25.0) {
+                if(visionValues.getTX() > 0.0) {
+                  turretRot.set(-0.05);
+                } else {
+                  turretRot.set(0.05);
+                  // turretRot.set((visionValues.getTX() * 0.005 < -20.0) ? -0.12 : visionValues.getTX() * 0.005);
+                }
+              } else {
+                if(visionValues.getTX() > 0.0) {
+                  turretRot.set(-0.15);
+                } else {
+                  turretRot.set(0.15);
+                  // turretRot.set((visionValues.getTX() * 0.005 < -20.0) ? -0.12 : visionValues.getTX() * 0.005);
+                }
+              }
+              // moveTurret(turretSet);
+              // prevTx = visionValues.getTX();
+              // turretController.setReference(turretSet, ControlType.kPosition);
+            } else {
+              turretRot.set(0.0);
             }
           } else {
+            SmartDashboard.putNumber("targetTimeout", targetTimeout);
             // we don't have a target in sight, so move the turret within its range of motion to find one
-            // at 30 fps this is one second
-            if(++targetTimeout > 30){
-              if(!rotReverse.get()) {
-                turretRot.set(-0.05);
-              } else if(!rotForward.get()) {
-                turretRot.set(0.05);
+            if(++targetTimeout > 50) {
+              if(!hitMax) {
+                turretRot.set(0.12);
+                if(turretRot.getEncoder().getPosition() >= 450.0) hitMax = true;
+              } else {
+                turretRot.set(-0.12);
+                if(turretRot.getEncoder().getPosition() <= 0.0) hitMax = false;
               }
             } else {
               turretRot.set(0.0);
@@ -207,16 +243,30 @@ public class TurretSubsystem extends SubsystemBase {
 
         actuatorController.setReference(angleSet, ControlType.kPosition);
 
-        double newAngle = SmartDashboard.getNumber("Turret Setpoint", turretSet);
-        moveTurret(newAngle);
+        // double newAngle 
+        turretSet = SmartDashboard.getNumber("Turret Setpoint", turretSet);
+        if(turretRot.getEncoder().getPosition() - turretSet * DEG_TO_ROT > 3.0) {
+          turretRot.set((Math.abs((turretSet * DEG_TO_ROT) - turretRot.getEncoder().getPosition()) > 30.0) ? -0.20 : -0.05);
+        } else if(turretRot.getEncoder().getPosition() - turretSet * DEG_TO_ROT < -3.0) {
+          turretRot.set((Math.abs((turretSet * DEG_TO_ROT) - turretRot.getEncoder().getPosition()) > 30.0) ? 0.20 : 0.05);
+        } else {
+          turretRot.set(0.0);
+        }
+        // moveTurret(newAngle);
 
       }
 
     } else {
-      CommandScheduler.getInstance().schedule(new InitializeActuatorCommand(), new InitializeTurretCommand());
+      // CommandScheduler.getInstance().schedule(new InitializeActuatorCommand());
+      CommandScheduler.getInstance().schedule(new InitializeTurretCommand());
     }
 
 
-    autoTrackEnabled = SmartDashboard.getBoolean("Auto Tracking", false);
-  }
+    SmartDashboard.putBoolean("Auto Tracking", autoTrackEnabled);
+    SmartDashboard.putNumber("Turret Encoder", turretRot.getEncoder().getPosition());
+    SmartDashboard.putBoolean("turretReverse", rotReverse.get());
+    SmartDashboard.putBoolean("turretForward", rotForward.get());
+    SmartDashboard.putBoolean("Turret Initialized", turretInitialized);
+    SmartDashboard.putBoolean("Actuator Initialized", actuatorInitialized);
+    }
 }
