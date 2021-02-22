@@ -6,6 +6,10 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class CustomVisionValues {
 
+    // boolean to track whether the vision table has been created
+    // can be checked in order to prevent null pointers and other exceptions
+    private boolean visionTableExists = false;
+
     private NetworkTableInstance inst;
 
     // NetworkTable that contains all of the subtables that track individual pipelines
@@ -31,20 +35,28 @@ public class CustomVisionValues {
         inst = NetworkTableInstance.getDefault();
 
         visionTable = inst.getTable("vision");
-        if(visionTable.containsSubTable(pipeline))
-            pipelineTable = visionTable.getSubTable(pipeline);
-        // TODO put in an exception to be thrown if it cannot find the pipeline
 
-        tx = pipelineTable.getEntry("tx");
-        ty = pipelineTable.getEntry("ty");
-        width = pipelineTable.getEntry("width");
-        height = pipelineTable.getEntry("height");
-        area = pipelineTable.getEntry("area");
-        dist = pipelineTable.getEntry("dist");
-        angleOffset = pipelineTable.getEntry("angleOffset");
-        reliability = pipelineTable.getEntry("reliability");
-        hasTarget = pipelineTable.getEntry("hasTarget");
-        pipelineName = pipelineTable.getEntry("pipelineName");
+        visionTable.addSubTableListener((parent, name, table) -> {
+            if(name.equals(pipeline)) {
+                visionTableExists = true;
+
+                tx = pipelineTable.getEntry("tx");
+                ty = pipelineTable.getEntry("ty");
+                width = pipelineTable.getEntry("width");
+                height = pipelineTable.getEntry("height");
+                area = pipelineTable.getEntry("area");
+                dist = pipelineTable.getEntry("dist");
+                angleOffset = pipelineTable.getEntry("angleOffset");
+                reliability = pipelineTable.getEntry("reliability");
+                hasTarget = pipelineTable.getEntry("hasTarget");
+                pipelineName = pipelineTable.getEntry("pipelineName");
+            }
+        }, false);
+
+    }
+
+    public boolean doesVisionTableExist() {
+        return visionTableExists;
     }
 
     // returns the value of tx, or the maximum value for a double if it can't get the value

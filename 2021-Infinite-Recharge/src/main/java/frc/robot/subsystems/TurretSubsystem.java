@@ -36,8 +36,8 @@ public class TurretSubsystem extends SubsystemBase {
   private CANDigitalInput rotReverse;
 
   private CustomVisionValues visionValues;
-  private double prevTx = Double.MAX_VALUE;
-  private double prevTy = Double.MAX_VALUE;
+  // private double prevTx = Double.MAX_VALUE;
+  // private double prevTy = Double.MAX_VALUE;
   // this stores the number of frames since the last time the target was seen
   // when this gets above a given threshold you can start searching for the target
   private int targetTimeout;
@@ -186,10 +186,9 @@ public class TurretSubsystem extends SubsystemBase {
   public void periodic() {
 
     if(turretInitialized && actuatorInitialized) {
-      System.out.println("Inside initialized part");
 
       // this seems bad but idk
-      if(autoTrackEnabled) {
+      if(autoTrackEnabled && visionValues.doesVisionTableExist()) {
         turretController.setOutputRange(0.0, 0.0);
 
         if(visionValues.hasTarget()) {
