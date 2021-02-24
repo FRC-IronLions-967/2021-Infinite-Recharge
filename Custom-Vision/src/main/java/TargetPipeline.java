@@ -16,8 +16,8 @@ public class TargetPipeline implements VisionPipeline {
   public volatile double height;
   public volatile double width;
   public volatile boolean hasTarget = false;
-  public final double MIN_AREA_PROP = 0.08;
-  public final double MAX_AREA_PROP = 0.35;
+  public final double MIN_AREA_PROP = 0.10;
+  public final double MAX_AREA_PROP = 0.30;
 
   public volatile Mat result;
 
@@ -30,14 +30,14 @@ public class TargetPipeline implements VisionPipeline {
 
     Imgproc.blur(mat, mat, new Size(3, 3));
 
-    Imgproc.threshold(mat, mat, 240, 255, 0);
+    Imgproc.threshold(mat, mat, 225, 255, 0);
 
     Imgproc.Canny(mat, mat, 50, 200, 3, false);
 
     List<MatOfPoint> contours = new ArrayList<>();
     Mat hierarchy = new Mat();
 
-    Imgproc.findContours(mat, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+    Imgproc.findContours(mat, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_NONE);
 
     MatOfPoint2f[] contoursPoly = new MatOfPoint2f[contours.size()];
     Rect boundRects[] = new Rect[contours.size()];

@@ -38,6 +38,7 @@ public class CustomVisionValues {
 
         visionTable.addSubTableListener((parent, name, table) -> {
             if(name.equals(pipeline)) {
+                pipelineTable = visionTable.getSubTable(name);
                 visionTableExists = true;
 
                 tx = pipelineTable.getEntry("tx");
