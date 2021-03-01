@@ -254,6 +254,36 @@ public class DriveSubsystem extends SubsystemBase {
     gyro.reset();
   }
 
+  public double getX() {
+    return kalman.getX().getData()[0][0];
+  }
+
+  public double getY() {
+    return kalman.getX().getData()[1][0];
+  }
+
+  public double getVX() {
+    return kalman.getX().getData()[2][0];
+  }
+
+  public double getVY() {
+    return kalman.getX().getData()[3][0];
+  }
+
+  public double getAX() {
+    return kalman.getX().getData()[4][0];
+  }
+
+  public double getAY() {
+    return kalman.getX().getData()[5][0];
+  }
+
+  public double getAngle() {
+    double angle = gyro.getAngle();
+    angle *= Math.PI / 180.0;
+    return angle % (2 * Math.PI);
+  }
+
   @Override
   public void periodic() {
     if(io.getDriverController().isButtonPressed("A")) resetKalman();
