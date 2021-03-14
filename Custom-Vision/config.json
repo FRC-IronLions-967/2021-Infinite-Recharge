@@ -1,0 +1,88 @@
+{
+    "fps": 60,
+    "height": 480,
+    "pixel format": "yuyv",
+    "properties": [
+        {
+            "name": "connect_verbose",
+            "value": 1
+        },
+        {
+            "name": "raw_brightness",
+            "value": 0
+        },
+        {
+            "name": "brightness",
+            "value": 0
+        },
+        {
+            "name": "raw_contrast",
+            "value": 30
+        },
+        {
+            "name": "contrast",
+            "value": 12
+        },
+        {
+            "name": "raw_saturation",
+            "value": 198
+        },
+        {
+            "name": "saturation",
+            "value": 78
+        },
+        {
+            "name": "raw_hue",
+            "value": -90
+        },
+        {
+            "name": "hue",
+            "value": 0
+        },
+        {
+            "name": "white_balance_automatic",
+            "value": false
+        },
+        {
+            "name": "exposure",
+            "value": 255
+        },
+        {
+            "name": "gain_automatic",
+            "value": false
+        },
+        {
+            "name": "raw_gain",
+            "value": 20
+        },
+        {
+            "name": "gain",
+            "value": 31
+        },
+        {
+            "name": "horizontal_flip",
+            "value": false
+        },
+        {
+            "name": "vertical_flip",
+            "value": false
+        },
+        {
+            "name": "power_line_frequency",
+            "value": 0
+        },
+        {
+            "name": "raw_sharpness",
+            "value": 0
+        },
+        {
+            "name": "sharpness",
+            "value": 0
+        },
+        {
+            "name": "auto_exposure",
+            "value": 0
+        }
+    ],
+    "width": 640
+}
