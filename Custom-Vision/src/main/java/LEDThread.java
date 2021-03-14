@@ -16,7 +16,7 @@ public class LEDThread extends Thread {
 
         Runtime rt = Runtime.getRuntime();
         try {
-            rt.exec("gpio mode 0 out");
+            rt.exec("gpio mode 3 out");
         } catch (IOException e) {
             DriverStation.reportError(e.getMessage(), true);
         }
@@ -33,13 +33,13 @@ public class LEDThread extends Thread {
             Runtime rt = Runtime.getRuntime();
             if(ledEntry.getBoolean(true)) {
                 try {
-                    rt.exec("gpio write 0 1");
+                    rt.exec("gpio write 3 1");
                 } catch (IOException e) {
                     DriverStation.reportError(e.getMessage(), true);
                 }
             } else {
                 try {
-                    rt.exec("gpio write 0 0");
+                    rt.exec("gpio write 3 0");
                 } catch (IOException e) {
                     DriverStation.reportError(e.getMessage(), true);
                 }

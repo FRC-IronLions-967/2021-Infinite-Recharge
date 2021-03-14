@@ -35,8 +35,8 @@ public class IO {
         manipulatorController.whenButtonPressed("RBUMP", new RPMUpCommand());
         manipulatorController.whenButtonPressed("START", new ToggleAutoTrackingCommand());
         manipulatorController.whenPOVButtonPressed("W", new ToggleIntakeCommand());
-        manipulatorController.whenPOVButtonPressed("N", new ChangeAngleCommand(10.0));
-        manipulatorController.whenPOVButtonPressed("S", new ChangeAngleCommand(-10.0));
+        manipulatorController.whenPOVButtonPressed("N", new ChangeAngleCommand(-10.0));
+        manipulatorController.whenPOVButtonPressed("S", new ChangeAngleCommand(10.0));
     }
 
     public XBoxController getDriverController() {

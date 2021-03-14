@@ -106,6 +106,9 @@ public class DriveSubsystem extends SubsystemBase {
   //class convenience method to move the robot to save space in the different drive methods
   public void move(double r, double l) {
 
+    System.out.println("r: " + r);
+    System.out.println("l: " + l);
+
     //defensive code to prevent the values being passed to move from exceeding the accepted ranges on the motor controllers
     r = (r > MAX) ? MAX :  r;
     r = (r < -(MAX)) ? -(MAX) : r;
@@ -134,7 +137,7 @@ public class DriveSubsystem extends SubsystemBase {
       v -= (Math.abs(difV) > maxDifV) ? maxDifV : Math.abs(difV);
     }
 
-    double s = (Math.abs(v) < 0.1) ? SmartDashboard.getNumber("scale", 0.5d) * x * SmartDashboard.getNumber("zeroTurn", 0.5d) : SmartDashboard.getNumber("scale", 0.5) * x * v;
+    double s = (Math.abs(v) < 0.1) ? SmartDashboard.getNumber("scale", 0.5d) * x * SmartDashboard.getNumber("zeroTurn", 0.5d) : SmartDashboard.getNumber("scale", 0.5d) * x * v;
 
 
     double l = v - s;
@@ -177,10 +180,10 @@ public class DriveSubsystem extends SubsystemBase {
     avgAcc = ((r - prevR) + (l - prevL)) / 0.04;
 
     // push raw gyro data to the dashboard for debugging
-    SmartDashboard.putNumber("rawAngle", gyro.getAngle());
+    SmartDashboard.putNumber("rawAngle", gyro.getRoll());
 
     // get the gyro angle in degrees and convert to radians since that's what Java's trig functions use
-    double theta = (gyro.getAngle()) * (Math.PI / 180.0);
+    double theta = (gyro.getRoll()) * (Math.PI / 180.0);
     SmartDashboard.putNumber("theta", theta);
 
     // get the current position values and update them with the current velocity and acceleration readings

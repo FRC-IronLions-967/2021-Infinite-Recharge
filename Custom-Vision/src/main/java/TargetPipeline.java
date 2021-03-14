@@ -30,7 +30,7 @@ public class TargetPipeline implements VisionPipeline {
 
     Imgproc.blur(mat, mat, new Size(3, 3));
 
-    Imgproc.threshold(mat, mat, 225, 255, 0);
+    Imgproc.threshold(mat, mat, 235, 255, 0);
 
     Imgproc.Canny(mat, mat, 50, 200, 3, false);
 
@@ -56,11 +56,12 @@ public class TargetPipeline implements VisionPipeline {
       for (int i = 0; i < boundRects.length; i++) {
           contourArea = Imgproc.contourArea(contours.get(i));
           area = boundRects[i].area();
-          if(contourArea / area < MAX_AREA_PROP && contourArea / area > MIN_AREA_PROP) {
+          if(contourArea / area < MAX_AREA_PROP && contourArea / area > MIN_AREA_PROP && area > 50) {
             targets.add(boundRects[i]);
           }
       }
 
+      System.out.println("Number of targets: " + targets.size());
       if(targets.size() > 0) {
 
         int maxIndex = 0;
@@ -69,7 +70,7 @@ public class TargetPipeline implements VisionPipeline {
           maxIndex = (targets.get(i).area() > targets.get(maxIndex).area()) ? i : maxIndex;
         }
 
-        Rect bRect = boundRects[maxIndex];
+        Rect bRect = targets.get(maxIndex);
         Imgproc.rectangle(mat, bRect.tl(), bRect.br(), new Scalar(0, 0, 255));
         tx = ((double)bRect.tl().x - (((double)mat.cols() / 2.0) - (double)bRect.width / 2.0));
         ty = ((((double)mat.rows() / 2.0) - (double)bRect.height / 2.0) - (double)bRect.tl().y);
