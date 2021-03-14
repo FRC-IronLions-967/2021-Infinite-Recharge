@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.*;
+import frc.robot.auto.*;
 import frc.robot.commands.*;
 import frc.robot.values.ValuesInstance;
 
@@ -27,6 +28,8 @@ public class Robot extends TimedRobot {
   private static final String kCustomAuto = "My Auto";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
+  private Autonomous m_auto;
+
   private SubsystemsInstance subsystemsInst;
   private IO ioInst;
   private ValuesInstance valInst;
@@ -81,6 +84,10 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     m_autoSelected = m_chooser.getSelected();
+    if(m_autoSelected.equals("TestAuto")) {
+      m_auto = new TestAuto();
+      m_auto.init();
+    }
     // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
     System.out.println("Auto selected: " + m_autoSelected);
   }
@@ -90,15 +97,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousPeriodic() {
-    switch (m_autoSelected) {
-      case kCustomAuto:
-        // Put custom auto code here
-        break;
-      case kDefaultAuto:
-      default:
-        // Put default auto code here
-        break;
-    }
+    m_auto.periodic();
   }
 
   /**

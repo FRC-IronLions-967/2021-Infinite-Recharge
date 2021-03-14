@@ -45,7 +45,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     leftFlywheel.setInverted(false);
     rightFlywheel.setInverted(true);
-    feedWheel.setInverted(false);
+    feedWheel.setInverted(true);
 
     leftFlywheel.setClosedLoopRampRate(2.0);
     rightFlywheel.setClosedLoopRampRate(2.0);
@@ -108,5 +108,9 @@ public class ShooterSubsystem extends SubsystemBase {
 
     SmartDashboard.putNumber("Flywheel Setpoint", targetRPM);
 
+    SmartDashboard.putNumber("Right Current", rightFlywheel.getOutputCurrent());
+    SmartDashboard.putNumber("Left Current", leftFlywheel.getOutputCurrent());
+    SmartDashboard.putNumber("Right RPM", rightFlywheel.getEncoder().getVelocity());
+    SmartDashboard.putNumber("Left RPM", leftFlywheel.getEncoder().getVelocity());
   }
 }
