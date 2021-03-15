@@ -273,11 +273,11 @@ public class TurretSubsystem extends SubsystemBase {
 
             deltaTx = visionValues.getTX() - prevTx;
             prevTx = visionValues.getTX();
+            hitMax = (prevTx > 0.0);
 
           } else {
             // changing this to attempt to begin tracking in the direction that the target went instead of missing
             // set hitMax based off of which way we think the target went
-            hitMax = (prevTx > 0.0);
             SmartDashboard.putNumber("targetTimeout", targetTimeout);
             // we don't have a target in sight, so move the turret within its range of motion to find one
             if(++targetTimeout > 50) {
