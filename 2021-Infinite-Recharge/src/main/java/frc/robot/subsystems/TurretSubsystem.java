@@ -38,8 +38,10 @@ public class TurretSubsystem extends SubsystemBase {
   private CANDigitalInput rotReverse;
 
   private CustomVisionValues visionValues;
-  // private double prevTx = Double.MAX_VALUE;
-  // private double prevTy = Double.MAX_VALUE;
+  private double prevTx = 0.0;
+  private double deltaTx = 0.0;
+  // private double prevTy = 0.0;
+
   // this stores the number of frames since the last time the target was seen
   // when this gets above a given threshold you can start searching for the target
   private int targetTimeout;
@@ -241,24 +243,41 @@ public class TurretSubsystem extends SubsystemBase {
           targetTimeout = 0;
           // both constants here are arbitrary and need to be tuned
           // the first is the acceptable margin of error in tx, and the second is checking to see if tx has actually changed before telling the turret to move more
+            // if(Math.abs(visionValues.getTX()) > 5.0) {
+            //   if(Math.abs(visionValues.getTX()) < 25.0) {
+            //     if(visionValues.getTX() > 0.0) {
+            //       turretRot.set(-0.05);
+            //     } else {
+            //       turretRot.set(0.05);
+            //     }
+            //   } else {
+            //     if(visionValues.getTX() > 0.0) {
+            //       turretRot.set(-0.15);
+            //     } else {
+            //       turretRot.set(0.15);
+            //     }
+            //   }
+            // } else {
+            //   turretRot.set(0.0);
+            // }
+
             if(Math.abs(visionValues.getTX()) > 5.0) {
-              if(Math.abs(visionValues.getTX()) < 25.0) {
-                if(visionValues.getTX() > 0.0) {
-                  turretRot.set(-0.05);
-                } else {
-                  turretRot.set(0.05);
-                }
+              if(visionValues.getTX() > 0.0) {
+                turretRot.set((Math.abs(visionValues.getTX()) < 25.0) ? -0.10 : -0.20);
               } else {
-                if(visionValues.getTX() > 0.0) {
-                  turretRot.set(-0.15);
-                } else {
-                  turretRot.set(0.15);
-                }
+                turretRot.set((Math.abs(visionValues.getTX()) < 25.0) ? 0.10 : 0.20);
               }
             } else {
               turretRot.set(0.0);
             }
+
+            deltaTx = visionValues.getTX() - prevTx;
+            prevTx = visionValues.getTX();
+
           } else {
+            // changing this to attempt to begin tracking in the direction that the target went instead of missing
+            // set hitMax based off of which way we think the target went
+            hitMax = (prevTx > 0.0);
             SmartDashboard.putNumber("targetTimeout", targetTimeout);
             // we don't have a target in sight, so move the turret within its range of motion to find one
             if(++targetTimeout > 50) {

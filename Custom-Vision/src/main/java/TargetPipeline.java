@@ -47,7 +47,7 @@ public class TargetPipeline implements VisionPipeline {
     for (int i = 0; i < contours.size(); i++) {
       contoursPoly[i] = new MatOfPoint2f();
       // attempting to change this in order to facillitate shape processing
-      Imgproc.approxPolyDP(new MatOfPoint2f(contours.get(i).toArray()), contoursPoly[i], 0.01 * Imgproc.arcLength(new MatOfPoint2f(contours.get(i).toArray()), true), true);
+      Imgproc.approxPolyDP(new MatOfPoint2f(contours.get(i).toArray()), contoursPoly[i], 7.0, true);
       boundRects[i] = Imgproc.boundingRect(contoursPoly[i]);
     }
 
