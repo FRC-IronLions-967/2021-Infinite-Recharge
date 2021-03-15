@@ -46,27 +46,32 @@ public class TargetPipeline implements VisionPipeline {
 
     for (int i = 0; i < contours.size(); i++) {
       contoursPoly[i] = new MatOfPoint2f();
-      Imgproc.approxPolyDP(new MatOfPoint2f(contours.get(i).toArray()), contoursPoly[i], 3, true);
+      // attempting to change this in order to facillitate shape processing
+      Imgproc.approxPolyDP(new MatOfPoint2f(contours.get(i).toArray()), contoursPoly[i], 0.01 * Imgproc.arcLength(new MatOfPoint2f(contours.get(i).toArray()), true), true);
       boundRects[i] = Imgproc.boundingRect(contoursPoly[i]);
     }
 
     if (boundRects.length > 0) {
   
       ArrayList<Rect> targets = new ArrayList<>();
+      // check what the ratio of contour area to bounding rectangle area is
+      // if this is off, we likely have not encountered the target we are looking for
+      // also checks if the number of sides in the shape is 8, the number of sides
+      // that the actual target has
       for (int i = 0; i < boundRects.length; i++) {
           contourArea = Imgproc.contourArea(contours.get(i));
           area = boundRects[i].area();
-          if(contourArea / area < MAX_AREA_PROP && contourArea / area > MIN_AREA_PROP && area > 50) {
+          if(contourArea / area < MAX_AREA_PROP && contourArea / area > MIN_AREA_PROP && area > 50 && contoursPoly[i].toList().size() == 8) {
             targets.add(boundRects[i]);
           }
       }
 
       System.out.println("Number of targets: " + targets.size());
-      if(targets.size() > 0) {
+      if (targets.size() > 0) {
 
         int maxIndex = 0;
 
-        for(int i = 1; i < targets.size(); i++) {
+        for (int i = 1; i < targets.size(); i++) {
           maxIndex = (targets.get(i).area() > targets.get(maxIndex).area()) ? i : maxIndex;
         }
 
