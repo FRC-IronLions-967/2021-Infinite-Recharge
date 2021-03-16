@@ -1,4 +1,4 @@
-name: Java CI with Gradle
+name: Build Robot Code
 
 on:
   push:
@@ -15,9 +15,5 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install JDK 11
         run: sudo apt install openjdk-11-jdk
-      - name: Debug 1
-        run: pwd
-      - name: Debug 2
-        run: ls -la
       - name: Change Directory and Execute
         run: cd 2021-Infinite-Recharge/ && chmod +x ./gradlew &&  ./gradlew build
