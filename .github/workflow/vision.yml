@@ -1,0 +1,22 @@
+# This workflow will build a Java project with Gradle
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+
+name: Build Custom Vision Code
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install JDK 11
+      run: sudo apt install openjdk-11-jdk
+    - name: Change Directory and Execute
+      run: cd Custom-Vision/ && chmod +x ./gradlew &&  ./gradlew build
