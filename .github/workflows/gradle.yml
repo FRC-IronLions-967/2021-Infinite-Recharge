@@ -15,6 +15,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install JDK 11
         run: sudo apt install openjdk-11-jdk
+      - name: Change to Project Directory
+        run: cd 2021-Infinite-Recharge/
       - name: Debug 1
         run: pwd
       - name: Debug 2
