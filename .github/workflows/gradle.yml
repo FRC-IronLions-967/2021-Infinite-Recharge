@@ -19,7 +19,9 @@ jobs:
         run: pwd
       - name: Debug 2
         run: ls -la
+      - name: Change Directory
+        run: cd 2021-Infinite-Recharge/
       - name: Allow Execution
-        run: chmod +x ./2021-Infinite-Recharge/gradlew
+        run: chmod +x ./gradlew
       - name: Execute Build
-        run: ./2021-Infinite-Recharge/gradlew build
+        run: ./gradlew build
