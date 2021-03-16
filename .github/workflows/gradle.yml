@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Install JDK 11
-        run: apt install jdk-11-jdk
+        run: sudo apt install jdk-11-jdk
       - name: Allow Execution
         run: chmod +x ./2021-Infinite-Recharge/gradlew
       - name: Execute Build

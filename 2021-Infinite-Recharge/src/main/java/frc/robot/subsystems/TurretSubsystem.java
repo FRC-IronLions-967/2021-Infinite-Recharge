@@ -220,14 +220,9 @@ public class TurretSubsystem extends SubsystemBase {
       case MANUAL_CONTROL:
         actuatorController.setReference(angleSet, ControlType.kPosition);
 
-        turretSet = SmartDashboard.getNumber("Turret Setpoint", turretSet);
-        if(turretRot.getEncoder().getPosition() - turretSet * DEG_TO_ROT > 3.0) {
-          turretRot.set((Math.abs((turretSet * DEG_TO_ROT) - turretRot.getEncoder().getPosition()) > 30.0) ? -0.20 : -0.05);
-        } else if(turretRot.getEncoder().getPosition() - turretSet * DEG_TO_ROT < -3.0) {
-          turretRot.set((Math.abs((turretSet * DEG_TO_ROT) - turretRot.getEncoder().getPosition()) > 30.0) ? 0.20 : 0.05);
-        } else {
-          turretRot.set(0.0);
-        }
+        turretController.setOutputRange(0.0, 0.0);
+
+        turretRot.set(io.getManipulatorController().getLeftStickX());
 
         if(autoTrackEnabled) state = TurretSubsystemStates.AUTO_TRACKING;
         break;
