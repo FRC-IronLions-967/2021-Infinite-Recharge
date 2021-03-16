@@ -12,12 +12,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v2
       - name: Install JDK 11
         run: sudo apt install openjdk-11-jdk
       - name: Debug 1
         run: pwd
       - name: Debug 2
         run: ls -la
+      - name: Change to Project Directory
       - name: Allow Execution
         run: chmod +x ./gradlew
       - name: Execute Build
