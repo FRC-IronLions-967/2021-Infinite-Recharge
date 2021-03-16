@@ -1,0 +1,20 @@
+name: Java CI with Gradle
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install JDK 11
+        run: apt install jdk-11-jdk
+      - name: Allow Execution
+        run: chmod +x ./2021-Infinite-Recharge/gradlew
+      - name: Execute Build
+        run: ./2021-Infinite-Recharge/gradlew build
