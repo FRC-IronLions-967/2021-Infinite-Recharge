@@ -16,8 +16,6 @@ jobs:
         run: sudo apt install openjdk-11-jdk
       - name: Debug 1
         run: pwd
-      - name: Change to Project Directory
-        run: cd ../../2021-Infinite-Recharge/
       - name: Debug 2
         run: ls -la
       - name: Allow Execution
