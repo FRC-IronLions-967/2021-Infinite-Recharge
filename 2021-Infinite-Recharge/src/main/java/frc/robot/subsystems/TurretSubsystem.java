@@ -207,7 +207,7 @@ public class TurretSubsystem extends SubsystemBase {
         break;
 
       case TURRET_INITIALIZING:
-        if(!manualInitComplete) turretRot.set(io.getManipulatorController().getLeftStickX());
+        if(!manualInitComplete) turretRot.set(0.5 * io.getManipulatorController().getLeftStickX());
         else CommandScheduler.getInstance().schedule(new InitializeTurretCommand());
 
         manualInitComplete = io.getManipulatorController().isButtonPressed("SELECT");
@@ -222,7 +222,7 @@ public class TurretSubsystem extends SubsystemBase {
 
         turretController.setOutputRange(0.0, 0.0);
 
-        turretRot.set(io.getManipulatorController().getLeftStickX());
+        turretRot.set(0.5 * io.getManipulatorController().getLeftStickX());
 
         if(autoTrackEnabled) state = TurretSubsystemStates.AUTO_TRACKING;
         break;

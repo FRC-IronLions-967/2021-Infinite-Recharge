@@ -90,11 +90,11 @@ public class DriveSubsystem extends SubsystemBase {
 
     RealMatrix init = new Array2DRowRealMatrix(new double[][] {{0}, {0}, {0}, {0}, {0}, {0}});
     RealMatrix initErr = new Array2DRowRealMatrix(new double[][] {{0.01, 0.0, 0.0, 0.0, 0.0, 0.0},
-                                                                            {0.0, 0.01, 0.0, 0.0, 0.0, 0.0},
-                                                                            {0.0, 0.0, 0.2, 0.0, 0.0, 0.0},
-                                                                            {0.0, 0.0, 0.0, 0.2, 0.0, 0.0},
-                                                                            {0.0, 0.0, 0.0, 0.0, 0.2, 0.0},
-                                                                            {0.0, 0.0, 0.0, 0.0, 0.0, 0.2}});
+                                                                  {0.0, 0.01, 0.0, 0.0, 0.0, 0.0},
+                                                                  {0.0, 0.0, 0.2, 0.0, 0.0, 0.0},
+                                                                  {0.0, 0.0, 0.0, 0.2, 0.0, 0.0},
+                                                                  {0.0, 0.0, 0.0, 0.0, 0.2, 0.0},
+                                                                  {0.0, 0.0, 0.0, 0.0, 0.0, 0.2}});
 
     kalman = new BasicPosKalman(init, initErr);
 
@@ -137,7 +137,7 @@ public class DriveSubsystem extends SubsystemBase {
       v -= (Math.abs(difV) > maxDifV) ? maxDifV : Math.abs(difV);
     }
 
-    double s = (Math.abs(v) < 0.1) ? SmartDashboard.getNumber("scale", 0.5d) * x * SmartDashboard.getNumber("zeroTurn", 0.5d) : SmartDashboard.getNumber("scale", 0.5d) * x * v;
+    double s = (Math.abs(v) < 0.1) ? SmartDashboard.getNumber("scale", 0.5d) * x * SmartDashboard.getNumber("zeroTurn", 0.3d) : SmartDashboard.getNumber("scale", 0.5d) * x * v;
 
 
     double l = v - s;
@@ -205,11 +205,11 @@ public class DriveSubsystem extends SubsystemBase {
     // matrices to update the Kalman filter with our measurements
     RealMatrix xm = new Array2DRowRealMatrix(new double[][] {{x}, {y}, {vx}, {vy}, {ax}, {ay}}); // 3.14 / 120
     RealMatrix err = new Array2DRowRealMatrix(new double[][] {{0.16, 0.0, 0.0, 0.0, 0.0, 0.0},
-                                                                        {0.0, 0.16, 0.0, 0.0, 0.0, 0.0},
-                                                                        {0.0, 0.0, 0.05, 0.0, 0.0, 0.0},
-                                                                        {0.0, 0.0, 0.0, 0.05, 0.0, 0.0},
-                                                                        {0.0, 0.0, 0.0, 0.0, 0.07, 0.0},
-                                                                        {0.0, 0.0, 0.0, 0.0, 0.0, 0.07}});
+                                                              {0.0, 0.16, 0.0, 0.0, 0.0, 0.0},
+                                                              {0.0, 0.0, 0.05, 0.0, 0.0, 0.0},
+                                                              {0.0, 0.0, 0.0, 0.05, 0.0, 0.0},
+                                                              {0.0, 0.0, 0.0, 0.0, 0.07, 0.0},
+                                                              {0.0, 0.0, 0.0, 0.0, 0.0, 0.07}});
     kalman.measure(xm, err);
     kalman.update();
 
