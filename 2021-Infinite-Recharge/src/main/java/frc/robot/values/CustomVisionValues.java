@@ -30,6 +30,15 @@ public class CustomVisionValues {
     private NetworkTableEntry hasTarget;
     private NetworkTableEntry pipelineName;
 
+    private double angles[] = {10.0, 20.0, 20.0, 30.0,
+                               30.0, 40.0, 40.0, 30.0,
+                               10.0, 10.0};
+
+    private double rpms[] = {5350.0, 5400.0, 5500.0,
+                             5600.0, 5400.0, 5500.0,
+                             5600.0, 5600.0, 5600.0,
+                             5600.0};
+
     // creates a new object that pulls data from the specified pipeline
     public CustomVisionValues(String pipeline) {
         inst = NetworkTableInstance.getDefault();
@@ -110,5 +119,18 @@ public class CustomVisionValues {
     // returns the name of this pipeline or "Unknown Pipeline" if it cannot find the name
     public String getPipelineName() {
         return pipelineName.getString("Unknown Pipeline");
+    }
+
+    // method to calculate the best angle setpoint for the hood based off of the vision target measurements
+    public double getHoodAngle() {
+        double widthVal = width.getDouble(Double.MAX_VALUE);
+        if(widthVal == Double.MAX_VALUE) return 0.0;
+
+        return 0.0;
+    }
+
+    // method to calculate the best rpm for the flywheel based off of the vision target measurements
+    public double getRPM() {
+        return 0.0;
     }
 }
