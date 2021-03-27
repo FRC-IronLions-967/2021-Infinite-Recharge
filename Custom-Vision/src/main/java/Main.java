@@ -372,6 +372,7 @@ public final class Main {
           NetworkTableEntry height = pipelineTable.getEntry("height");
           NetworkTableEntry width = pipelineTable.getEntry("width");
           NetworkTableEntry area = pipelineTable.getEntry("area");
+          NetworkTableEntry areaProp = pipelineTable.getEntry("areaProp");
           NetworkTableEntry hasTarget = pipelineTable.getEntry("hasTarget");
 
           tx.setDouble(pipeline.tx);
@@ -380,6 +381,7 @@ public final class Main {
           height.setDouble(pipeline.height);
           width.setDouble(pipeline.width);
           area.setDouble(pipeline.area);
+          areaProp.setDouble(pipeline.areaProp);
           hasTarget.setBoolean(pipeline.hasTarget);
 
           // need to come up with a way to do this, but right now just push 0 to the table

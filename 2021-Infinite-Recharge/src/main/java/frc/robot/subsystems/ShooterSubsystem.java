@@ -30,6 +30,9 @@ public class ShooterSubsystem extends SubsystemBase {
   private ValuesInstance valInst;
 
   private boolean feederOn = false;
+  private boolean flywheelOn = false;
+
+  private int cnt = 0;
 
   private double targetRPM;
   private final double maxRPM;
@@ -88,10 +91,23 @@ public class ShooterSubsystem extends SubsystemBase {
     feederOn = (feederOn) ? false : true;
   }
 
+  public void runFeeder(double speed) {
+    feedWheel.set(ControlMode.PercentOutput, speed);
+  }
+
   @Override
   public void periodic() {
 
-    if(ioInst.getManipulatorController().isTriggerPressed(XBoxController.RIGHT_TRIGGER)) {
+    // this is probabbly a bad practice
+    if(ioInst.getManipulatorController().isTriggerPressed(XBoxController.RIGHT_TRIGGER) && cnt == 0) {
+      flywheelOn = (flywheelOn) ? false :true;
+      cnt = 25;
+    }
+
+    if(cnt > 0) cnt--;
+
+    // if(ioInst.getManipulatorController().isTriggerPressed(XBoxController.RIGHT_TRIGGER)) {
+    if(flywheelOn) {
       leftController.setReference(targetRPM, ControlType.kVelocity);
       rightController.setReference(targetRPM, ControlType.kVelocity);
     } else {
@@ -100,11 +116,11 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     // if(ioInst.getManipulatorController().isButtonPressed("X")) {
-      if(feederOn) {
-      feedWheel.set(ControlMode.PercentOutput, 1.0);
-    } else {
-      feedWheel.set(ControlMode.PercentOutput, 0.0);
-    }
+    // if(feederOn) {
+      // feedWheel.set(ControlMode.PercentOutput, 1.0);
+    // } else {
+      // feedWheel.set(ControlMode.PercentOutput, 0.0);
+    // }
 
     SmartDashboard.putNumber("Flywheel Setpoint", targetRPM);
 

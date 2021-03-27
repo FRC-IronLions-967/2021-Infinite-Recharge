@@ -245,9 +245,9 @@ public class TurretSubsystem extends SubsystemBase {
                 }
               } else {
                 if(visionValues.getTX() > 0.0) {
-                  turretRot.set(-0.15);
+                  turretRot.set(-0.2);
                 } else {
-                  turretRot.set(0.15);
+                  turretRot.set(0.2);
                 }
               }
             } else {
@@ -258,10 +258,10 @@ public class TurretSubsystem extends SubsystemBase {
             // we don't have a target in sight, so move the turret within its range of motion to find one
             if(++targetTimeout > 50) {
               if(!hitMax) {
-                turretRot.set(0.25);
+                turretRot.set(0.4);
                 if(turretRot.getEncoder().getPosition() >= 450.0) hitMax = true;
               } else {
-                turretRot.set(-0.25);
+                turretRot.set(-0.4);
                 if(turretRot.getEncoder().getPosition() <= 0.0) hitMax = false;
               }
             } else {

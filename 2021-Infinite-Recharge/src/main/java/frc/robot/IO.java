@@ -29,7 +29,8 @@ public class IO {
 
         manipulatorController.whenButtonPressed("A", new RPMPresetCommand(valInst.m_values.getDoubleValue("defaultPresetOne")));
         manipulatorController.whenButtonPressed("B", new RPMPresetCommand(valInst.m_values.getDoubleValue("defaultPresetTwo")));
-        manipulatorController.whenButtonPressed("X", new ToggleFeedCommand());
+        manipulatorController.whenButtonPressed("X", new RunFeederCommand(1.0));
+        manipulatorController.whenButtonReleased("X", new RunFeederCommand(0.0));
         manipulatorController.whenButtonPressed("Y", new ToggleLEDCommand());
         manipulatorController.whenButtonPressed("LBUMP", new RPMDownCommand());
         manipulatorController.whenButtonPressed("RBUMP", new RPMUpCommand());

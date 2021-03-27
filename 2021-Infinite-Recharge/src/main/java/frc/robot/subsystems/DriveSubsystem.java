@@ -106,8 +106,8 @@ public class DriveSubsystem extends SubsystemBase {
   //class convenience method to move the robot to save space in the different drive methods
   public void move(double r, double l) {
 
-    System.out.println("r: " + r);
-    System.out.println("l: " + l);
+    // System.out.println("r: " + r);
+    // System.out.println("l: " + l);
 
     //defensive code to prevent the values being passed to move from exceeding the accepted ranges on the motor controllers
     r = (r > MAX) ? MAX :  r;
@@ -129,7 +129,7 @@ public class DriveSubsystem extends SubsystemBase {
     // difference between current velocity and commanded velocity in the y direction
     double difV = y - v; 
     SmartDashboard.putNumber("difV", difV);
-    double maxDifV = SmartDashboard.getNumber("maxAccel", 0.02d);
+    double maxDifV = SmartDashboard.getNumber("maxAccel", 0.03d);
 
     if(difV > 0) {
       v += (difV > maxDifV) ? maxDifV : difV;
@@ -137,7 +137,7 @@ public class DriveSubsystem extends SubsystemBase {
       v -= (Math.abs(difV) > maxDifV) ? maxDifV : Math.abs(difV);
     }
 
-    double s = (Math.abs(v) < 0.1) ? SmartDashboard.getNumber("scale", 0.5d) * x * SmartDashboard.getNumber("zeroTurn", 0.3d) : SmartDashboard.getNumber("scale", 0.5d) * x * v;
+    double s = (Math.abs(v) < 0.05) ? SmartDashboard.getNumber("scale", 0.5d) * x * SmartDashboard.getNumber("zeroTurn", 0.3d) : SmartDashboard.getNumber("scale", 0.5d) * x * Math.abs(v);
 
 
     double l = v - s;
