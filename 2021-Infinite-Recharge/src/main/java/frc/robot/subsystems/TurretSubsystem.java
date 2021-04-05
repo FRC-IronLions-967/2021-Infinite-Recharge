@@ -222,7 +222,13 @@ public class TurretSubsystem extends SubsystemBase {
 
         turretController.setOutputRange(0.0, 0.0);
 
-        turretRot.set(0.5 * io.getManipulatorController().getLeftStickX());
+        double turretSpeed = 0.5 * io.getManipulatorController().getLeftStickX();
+
+        // check for limits to prevent the cables from being snapped
+        turretSpeed = (turretSpeed > 0.0 && turretRot.getEncoder().getPosition() >= 450.0) ? 0.0 : turretSpeed;
+        turretSpeed = (turretSpeed < 0.0 && turretRot.getEncoder().getPosition() <= 0.0) ? 0.0 : turretSpeed;
+
+        turretRot.set(turretSpeed);
 
         if(autoTrackEnabled) state = TurretSubsystemStates.AUTO_TRACKING;
         break;
@@ -284,4 +290,5 @@ public class TurretSubsystem extends SubsystemBase {
     SmartDashboard.putBoolean("Turret Initialized", turretInitialized);
     SmartDashboard.putBoolean("Actuator Initialized", actuatorInitialized);
     }
+
 }

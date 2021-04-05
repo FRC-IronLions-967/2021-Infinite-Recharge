@@ -100,7 +100,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     // this is probabbly a bad practice
     if(ioInst.getManipulatorController().isTriggerPressed(XBoxController.RIGHT_TRIGGER) && cnt == 0) {
-      flywheelOn = (flywheelOn) ? false :true;
+      flywheelOn = (flywheelOn) ? false : true;
       cnt = 25;
     }
 

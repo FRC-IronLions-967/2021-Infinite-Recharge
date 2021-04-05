@@ -87,6 +87,13 @@ public class TargetPipeline implements VisionPipeline {
       }
     }
 
+    Imgproc.line(mat, new Point(320, 80), new Point(320, 100), new Scalar(0, 255, 0), 2, Imgproc.LINE_8, 0);
+    Imgproc.line(mat, new Point(310, 90), new Point(330, 90), new Scalar(0, 255, 0), 2, Imgproc.LINE_8, 0);
+    Imgproc.line(mat, new Point(320, 110), new Point(320, 440), new Scalar(0, 255, 0), 2, Imgproc.LINE_8, 0);
+    for(int i = 110; i < 440; i += 30) {
+      Imgproc.line(mat, new Point(310, i), new Point(330, i), new Scalar(0, 255, 0), 2, Imgproc.LINE_8, 0);
+    }
+
     this.result = mat.clone();
   }
 }
