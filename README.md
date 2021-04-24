@@ -1,10 +1,11 @@
 # 2021-Infinite-Recharge
 This repository is for code for the 2021 robot for the Infinite Recharge game.  It also contains some custom vision code that we wrote as an alternative to the limelight we were using last year.  This file should contain the steps necessary to get up and running with this code on your computer.
 
+## FIRST Game Tools
+Before you do anything else, make sure that you have the FRC Game Tools and WPILib installed on your system.  Instructions and download links can be found at https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-2/frc-game-tools.html and https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-2/wpilib-setup.html.  Please note that you will need Windows 10 in order to run the driver station, but you can compile and deploy the code on Linux or Mac.
+
 ## Download and Installation
 The first thing that you'll want to do is clone this repository onto your computer, which can be done through Github Desktop by going to Current Repository->Add->URL, and entering the URL for this repo.  You can also clone it from the command line by using `git clone <url>`.
-
-After cloning the repo, you will also need to download a math library for the navigation system on the robot to work.  In the `2021-Infinite-Recharge` folder, create a new folder called `libs`.  Go to https://commons.apache.org/proper/commons-math/download_math.cgi and download the 3.6.1 .zip file.  Extract the archive and copy the `commons-math3-3.6.1.jar` file to the new `libs` folder.
 
 Next, open a terminal in the `2021-Infinite-Recharge` project directory (not the Github repo directory) and type `./gradlew build`.  Assuming you did everything correctly, it should say the build was successful and display the time taken.  Be aware that the first build can take a while, especially on old PC's or ones with a slow internet connection.
 
