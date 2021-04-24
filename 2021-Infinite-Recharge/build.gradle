@@ -52,7 +52,8 @@ dependencies {
     nativeZip wpi.deps.vendor.jni(wpi.platforms.roborio)
     nativeDesktopZip wpi.deps.vendor.jni(wpi.platforms.desktop)
 
-    implementation files('libs/commons-math3-3.6.1.jar')
+    // implementation files('libs/commons-math3-3.6.1.jar')
+    implementation group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
 
     testImplementation 'junit:junit:4.12'
 
