@@ -9,7 +9,6 @@
 
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.SPI;
 import frc.robot.IO;
@@ -128,8 +127,10 @@ public class DriveSubsystem extends SubsystemBase {
 
     // difference between current velocity and commanded velocity in the y direction
     double difV = y - v; 
-    SmartDashboard.putNumber("difV", difV);
-    double maxDifV = SmartDashboard.getNumber("maxAccel", 0.03d);
+    // SmartDashboard.putNumber("difV", difV);
+    valInst.m_dashboardThread.putDouble("difV", difV);
+    // double maxDifV = SmartDashboard.getNumber("maxAccel", 0.03d);
+    double maxDifV = valInst.m_dashboardThread.getDouble("maxAccel", 0.03d);
 
     if(difV > 0) {
       v += (difV > maxDifV) ? maxDifV : difV;
@@ -137,7 +138,8 @@ public class DriveSubsystem extends SubsystemBase {
       v -= (Math.abs(difV) > maxDifV) ? maxDifV : Math.abs(difV);
     }
 
-    double s = (Math.abs(v) < 0.05) ? SmartDashboard.getNumber("scale", 0.5d) * x * SmartDashboard.getNumber("zeroTurn", 0.3d) : SmartDashboard.getNumber("scale", 0.5d) * x * Math.abs(v);
+    // double s = (Math.abs(v) < 0.05) ? SmartDashboard.getNumber("scale", 0.5d) * x * SmartDashboard.getNumber("zeroTurn", 0.3d) : SmartDashboard.getNumber("scale", 0.5d) * x * Math.abs(v);
+    double s = (Math.abs(v) < 0.05) ? valInst.m_dashboardThread.getDouble("scale", 0.5d) * x * valInst.m_dashboardThread.getDouble("zeroTurn", 0.3d) : valInst.m_dashboardThread.getDouble("scale", 0.5d) * x * Math.abs(v);
 
 
     double l = v - s;
@@ -180,11 +182,13 @@ public class DriveSubsystem extends SubsystemBase {
     avgAcc = ((r - prevR) + (l - prevL)) / 0.04;
 
     // push raw gyro data to the dashboard for debugging
-    SmartDashboard.putNumber("rawAngle", gyro.getRoll());
+    // SmartDashboard.putNumber("rawAngle", gyro.getRoll());
+    valInst.m_dashboardThread.putDouble("rawAngle", gyro.getRoll());
 
     // get the gyro angle in degrees and convert to radians since that's what Java's trig functions use
     double theta = (gyro.getRoll()) * (Math.PI / 180.0);
-    SmartDashboard.putNumber("theta", theta);
+    // SmartDashboard.putNumber("theta", theta);
+    valInst.m_dashboardThread.putDouble("theta", theta);
 
     // get the current position values and update them with the current velocity and acceleration readings
     double x = result[0][0];

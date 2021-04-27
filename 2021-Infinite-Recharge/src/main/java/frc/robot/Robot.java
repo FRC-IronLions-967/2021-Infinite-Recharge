@@ -42,16 +42,21 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
+    // don't have a way to do this with the thread yet
     SmartDashboard.putData("Auto choices", m_chooser);
-    SmartDashboard.putNumber("maxAccel", 0.02d);
-    SmartDashboard.putNumber("scale", 0.5d);
-    SmartDashboard.putNumber("zeroTurn", 0.5d);
+    // SmartDashboard.putNumber("maxAccel", 0.02d);
+    // SmartDashboard.putNumber("scale", 0.5d);
+    // SmartDashboard.putNumber("zeroTurn", 0.5d);
 
     ioInst = IO.getInstance();
 
     valInst = ValuesInstance.getInstance();
 
     subsystemsInst = SubsystemsInstance.getInstance();
+
+    valInst.m_dashboardThread.putDouble("maxAccel", 0.02d);
+    valInst.m_dashboardThread.putDouble("scale", 0.5d);
+    valInst.m_dashboardThread.putDouble("zeroTurn", 0.5d);
   }
 
   /**
@@ -66,8 +71,10 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
 
-    SmartDashboard.putNumber("leftSpeed", subsystemsInst.m_driveSubsystem.getLeftSpeed());
-    SmartDashboard.putNumber("rightSpeed", subsystemsInst.m_driveSubsystem.getRightSpeed());
+    // SmartDashboard.putNumber("leftSpeed", subsystemsInst.m_driveSubsystem.getLeftSpeed());
+    // SmartDashboard.putNumber("rightSpeed", subsystemsInst.m_driveSubsystem.getRightSpeed());
+    valInst.m_dashboardThread.putDouble("leftSpeed", subsystemsInst.m_driveSubsystem.getLeftSpeed());
+    valInst.m_dashboardThread.putDouble("rightSpeed", subsystemsInst.m_driveSubsystem.getRightSpeed());
   }
 
   /**

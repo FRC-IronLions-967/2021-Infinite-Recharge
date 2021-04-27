@@ -14,7 +14,6 @@ import com.revrobotics.CANDigitalInput.LimitSwitchPolarity;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANDigitalInput;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.IO;
@@ -105,9 +104,13 @@ public class TurretSubsystem extends SubsystemBase {
     turretController.setReference(0.0, ControlType.kPosition);
     turretController.setOutputRange(valInst.m_pidValues.getDoubleValue("turretMin"), valInst.m_pidValues.getDoubleValue("turretMax"));
 
-    SmartDashboard.putNumber("Angle Setpoint", 0.0);
-    SmartDashboard.putNumber("Turret Setpoint", 0.0);
-    SmartDashboard.putBoolean("Auto Tracking", false);
+    // SmartDashboard.putNumber("Angle Setpoint", 0.0);
+    // SmartDashboard.putNumber("Turret Setpoint", 0.0);
+    // SmartDashboard.putBoolean("Auto Tracking", false);
+
+    valInst.m_dashboardThread.putDouble("Angle Setpoint", 0.0);
+    valInst.m_dashboardThread.putDouble("Turret Setpoint", 0.0);
+    valInst.m_dashboardThread.putBoolean("Auto Tracking", false);
 
     visionValues = new CustomVisionValues("target");
     targetTimeout = 0;
@@ -131,7 +134,9 @@ public class TurretSubsystem extends SubsystemBase {
     turretRot.getEncoder().setPosition(450.0);
     turretController.setReference(450.0, ControlType.kPosition);
 
-    SmartDashboard.putNumber("Turret Setpoint", 360.0);
+    // SmartDashboard.putNumber("Turret Setpoint", 360.0);
+
+    valInst.m_dashboardThread.putDouble("Turret Setpoint", 360.0);
 
     rotReverse.enableLimitSwitch(false);
     rotForward.enableLimitSwitch(false);
@@ -169,7 +174,9 @@ public class TurretSubsystem extends SubsystemBase {
     turretSet = turretRot.getEncoder().getPosition() * ROT_TO_DEG;
     turretController.setOutputRange(valInst.m_pidValues.getDoubleValue("turretMin"), valInst.m_pidValues.getDoubleValue("turretMax"));
     turretController.setReference(turretSet, ControlType.kPosition);
-    SmartDashboard.putNumber("Turret Setpoint", turretSet);
+    // SmartDashboard.putNumber("Turret Setpoint", turretSet);
+
+    valInst.m_dashboardThread.putDouble("Turret Setpoint", turretSet);
     autoTrackEnabled = false;
   }
 
@@ -260,7 +267,8 @@ public class TurretSubsystem extends SubsystemBase {
               turretRot.set(0.0);
             }
           } else {
-            SmartDashboard.putNumber("targetTimeout", targetTimeout);
+            // SmartDashboard.putNumber("targetTimeout", targetTimeout);
+            valInst.m_dashboardThread.putDouble("targetTimeout", targetTimeout);
             // we don't have a target in sight, so move the turret within its range of motion to find one
             if(++targetTimeout > 50) {
               if(!hitMax) {
@@ -282,13 +290,21 @@ public class TurretSubsystem extends SubsystemBase {
 
     // autoTrackEnabled = SmartDashboard.getBoolean("Auto Tracking", autoTrackEnabled);
 
-    SmartDashboard.putBoolean("Auto Tracking", autoTrackEnabled);
-    SmartDashboard.putNumber("Angle Setpoint", angleSet);
-    SmartDashboard.putNumber("Turret Encoder", turretRot.getEncoder().getPosition());
-    SmartDashboard.putBoolean("turretReverse", rotReverse.get());
-    SmartDashboard.putBoolean("turretForward", rotForward.get());
-    SmartDashboard.putBoolean("Turret Initialized", turretInitialized);
-    SmartDashboard.putBoolean("Actuator Initialized", actuatorInitialized);
+    // SmartDashboard.putBoolean("Auto Tracking", autoTrackEnabled);
+    // SmartDashboard.putNumber("Angle Setpoint", angleSet);
+    // SmartDashboard.putNumber("Turret Encoder", turretRot.getEncoder().getPosition());
+    // SmartDashboard.putBoolean("turretReverse", rotReverse.get());
+    // SmartDashboard.putBoolean("turretForward", rotForward.get());
+    // SmartDashboard.putBoolean("Turret Initialized", turretInitialized);
+    // SmartDashboard.putBoolean("Actuator Initialized", actuatorInitialized);
+
+      valInst.m_dashboardThread.putBoolean("Auto Tracking", autoTrackEnabled);
+      valInst.m_dashboardThread.putDouble("Angle Setpoint", angleSet);
+      valInst.m_dashboardThread.putDouble("Turret Encoder", turretRot.getEncoder().getPosition());
+      valInst.m_dashboardThread.putBoolean("turretReverse", rotReverse.get());
+      valInst.m_dashboardThread.putBoolean("turretForward", rotForward.get());
+      valInst.m_dashboardThread.putBoolean("Turret Initialized", turretInitialized);
+      valInst.m_dashboardThread.putBoolean("Actuator Initialized", actuatorInitialized);
     }
 
 }

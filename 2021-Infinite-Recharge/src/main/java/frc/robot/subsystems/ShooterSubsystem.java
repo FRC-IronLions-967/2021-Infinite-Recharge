@@ -11,7 +11,6 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.IO;
 import frc.robot.utils.controls.XBoxController;
@@ -71,7 +70,8 @@ public class ShooterSubsystem extends SubsystemBase {
     targetRPM = valInst.m_values.getDoubleValue("defaultTargetRPM");
     maxRPM = valInst.m_values.getDoubleValue("maxShooterRPM");
 
-    SmartDashboard.putNumber("Flywheel Setpoint", 0.0);
+    // SmartDashboard.putNumber("Flywheel Setpoint", 0.0);
+    valInst.m_dashboardThread.putDouble("Flywheel Setpoint", 0.0);
   }
 
   // sets the rpm that the flywheel will target when it is told to activate
@@ -122,11 +122,17 @@ public class ShooterSubsystem extends SubsystemBase {
       // feedWheel.set(ControlMode.PercentOutput, 0.0);
     // }
 
-    SmartDashboard.putNumber("Flywheel Setpoint", targetRPM);
+    // SmartDashboard.putNumber("Flywheel Setpoint", targetRPM);
+    valInst.m_dashboardThread.putDouble("Flywheel Setpoint", targetRPM);
 
-    SmartDashboard.putNumber("Right Current", rightFlywheel.getOutputCurrent());
-    SmartDashboard.putNumber("Left Current", leftFlywheel.getOutputCurrent());
-    SmartDashboard.putNumber("Right RPM", rightFlywheel.getEncoder().getVelocity());
-    SmartDashboard.putNumber("Left RPM", leftFlywheel.getEncoder().getVelocity());
+    // SmartDashboard.putNumber("Right Current", rightFlywheel.getOutputCurrent());
+    // SmartDashboard.putNumber("Left Current", leftFlywheel.getOutputCurrent());
+    // SmartDashboard.putNumber("Right RPM", rightFlywheel.getEncoder().getVelocity());
+    // SmartDashboard.putNumber("Left RPM", leftFlywheel.getEncoder().getVelocity());
+
+    valInst.m_dashboardThread.putDouble("Right Current", rightFlywheel.getOutputCurrent());
+    valInst.m_dashboardThread.putDouble("Left Current", leftFlywheel.getOutputCurrent());
+    valInst.m_dashboardThread.putDouble("Right RPM", rightFlywheel.getEncoder().getVelocity());
+    valInst.m_dashboardThread.putDouble("Left RPM", leftFlywheel.getEncoder().getVelocity());
   }
 }

@@ -3,7 +3,6 @@ package frc.robot.utils.controls;
 import java.util.HashMap;
 
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.buttons.Trigger;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.commands.DoNothingCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
