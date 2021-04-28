@@ -15,10 +15,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class SmartDashboardThread extends Thread {
 
-    // hashmap that is exposed to other classes in the program
+    // hashmap that is exposed to other classes in the programwith
     private HashMap<String, Object> userValues;
 
-    // hashmap for this class only, is modified before data is synced with the dashboard
+    private HashMap<String, Object> outgoingValues;
+
+    // hashmap for this class only, is modified before data is synced  the dashboard
     private HashMap<String, Object> networkValues;
 
     private ReentrantLock userValuesLock = new ReentrantLock();
@@ -37,11 +39,12 @@ public class SmartDashboardThread extends Thread {
     // returns true if successful, or false if it cannot acquire a lock within 5 ms
     public boolean putBoolean(String key, boolean value) {
         try {
-            if(networkValuesLock.tryLock(5, TimeUnit.MILLISECONDS)) {
+            if(userValuesLock.tryLock(5, TimeUnit.MILLISECONDS)) {
                 try {
-                    networkValues.put(key, value);
+                    outgoingValues.put(key, value);
+                    userValues.put(key, value);
                 } finally {
-                    networkValuesLock.unlock();
+                    userValuesLock.unlock();
                 }
                 return true;
             }
@@ -53,14 +56,16 @@ public class SmartDashboardThread extends Thread {
     }
 
     public boolean getBoolean(String key, boolean defaultValue) {
-        userValuesLock.lock();
-        // use of instanceof seems a little sketchy but it should be safe
-        if(userValues.containsKey(key) && userValues.get(key) instanceof Boolean) {
+        try {
+            userValuesLock.lock();
+            // use of instanceof seems a little sketchy but it should be safe
+            if(userValues.containsKey(key) && userValues.get(key) instanceof Boolean) {
+                return (Boolean) userValues.get(key);
+            }
+        } finally {
             userValuesLock.unlock();
-            return (Boolean) userValues.get(key);
         }
 
-        userValuesLock.unlock();
         return defaultValue;
     }
 
@@ -68,6 +73,7 @@ public class SmartDashboardThread extends Thread {
         try {
             if(networkValuesLock.tryLock(5, TimeUnit.MILLISECONDS)) {
                 try {
+                    outgoingValues.put(key, value);
                     networkValues.put(key, value);
                 } finally {
                     networkValuesLock.unlock();
@@ -96,6 +102,7 @@ public class SmartDashboardThread extends Thread {
         try {
             if(networkValuesLock.tryLock(5, TimeUnit.MILLISECONDS)) {
                 try {
+                    outgoingValues.put(key, value);
                     networkValues.put(key, value);
                 } finally {
                     networkValuesLock.unlock();
@@ -125,32 +132,47 @@ public class SmartDashboardThread extends Thread {
     }
 
     private void syncDashboard() throws InterruptedException {
-        if(networkValuesLock.tryLock(10, TimeUnit.MILLISECONDS)) {
-            try {
-                String[] keys = (String[]) networkValues.keySet().toArray();
+        try {
 
-                for(int i = 0; i < keys.length; i++) {
-                    Object o = networkValues.get(keys[i]);
+            if(networkValuesLock.tryLock(10, TimeUnit.MILLISECONDS)) {
+
+                String[] outgoingKeys = (String[]) outgoingValues.keySet().toArray();
+
+                for(String s : outgoingKeys) {
+                    Object o = outgoingValues.get(s);
                     if(o instanceof Boolean) {
-                        SmartDashboard.putBoolean(keys[i], (Boolean) o);
+                        SmartDashboard.putBoolean(s, (Boolean) o);
                     } else if(o instanceof Double) {
-                        SmartDashboard.putNumber(keys[i], (Double) o);
+                        SmartDashboard.putNumber(s, (Double) o);
                     } else if(o instanceof String) {
-                        SmartDashboard.putBoolean(keys[i], (Boolean) o);
+                        SmartDashboard.putBoolean(s, (Boolean) o);
                     }
                 }
 
-            } finally {
-                networkValuesLock.unlock();
+                String[] networkKeys = (String[]) networkValues.keySet().toArray();
+
+                for(String s : networkKeys) {
+                    Object o = networkValues.get(s);
+                    if(o instanceof Boolean) {
+                        networkValues.put(s, SmartDashboard.getBoolean(s, (Boolean) networkValues.get(s)));
+                    } else if(o instanceof Double) {
+                        networkValues.put(s, SmartDashboard.getNumber(s, (Double) networkValues.get(s)));
+                    } else if(o instanceof String) {
+                        networkValues.put(s, SmartDashboard.getString(s, (String) networkValues.get(s)));
+                    }
+                }
+
+                outgoingValues = new HashMap<>();
+
+                lastUpdateSuccessful.set(true);
+                return;
             }
 
-            lastUpdateSuccessful.set(true);
+            lastUpdateSuccessful.set(false);
 
-            return;
-
+        } finally {
+            networkValuesLock.unlock();
         }
-
-        lastUpdateSuccessful.set(false);
 
     }
 
