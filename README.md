@@ -16,3 +16,19 @@ If you want to get the code onto the robot, open the `2021-Infinite-Recharge` pr
 Before proceeding with this section, please see https://docs.wpilib.org/en/stable/docs/software/vision-processing/ and make sure that your Raspberry Pi for vision processing is set up correctly.  One good tip we've found is to use a USB stick in a Pi 4's USB 3.0 port (the blue ones) as the boot drive instead of the SD card.  This helps to prevent annoying corruption if sudden power loss occurs.
 
 Inside the `Custom-Vision` folder, you can run the same `./gradlew build` command as in the robot project to compile the project.  Connect the Raspberry Pi that you are using for vision to either your computer's Ethernet port or the robot network.  Go to http://wpilibpi.local and go to the `Application` tab.  In the `Vision Application Configuration` section, select `Uploaded Java jar` from the dropdown menu and then click the `Browse` button.  Go to the folder with the vision project, and go to build->libs.  Select and upload the `****-all.jar` file.  Make sure that the Pi is set to writable, then click `Upload and Save`.  Wait 5 seconds, and the application should start and begin vision processing.  You can go to http://wpilibpi.local:1186 to view the processed image stream, or http://wpilibpi.local:1181 to see the unprocessed image stream.
+
+## Robot Controls
+The robot is controlled by two USB joysticks.  The first joystick should be in position 0 on the FRC Driver Station and is responsible for controlling the movement of the robot.  The y-axis on the left most analog stick of this controller controls the throttle, and the x-axis of the right most analog stick of this controller controls steering.  The other controller should be in position 1 on the FRC Driver Station, and is responsible for controlling the manipulator on the robot.  A summary of all buttons are as follows:<br>
+`A` - Sets the RPM target of the flywheel to 5600
+`B` - Sets the RPM target of the flywheel to 6100
+`X` - Holding this button down runs the kicker, releasing it turns the kicker off
+`Y` - Toggles the LEDs on the vision system, behavior does not always seem consistent
+`SELECT` - Runs the turret initialization routine
+`START` - Toggles target auto tracking
+`LBUMP` - Drops the flywheel RPM target by 50
+`RBUMP` - Increases the flywheel RPM target by 50
+`DOWN` - Increases the turret angle (decreases the firing arc)
+`UP` - Decreases the turret angle (increases the firing arc)
+`LEFT` - Toggles the intake belts
+`RTRIG` - Toggles the flywheel, flywheel will attempt to reach its target RPM
+`LTRIG` - Holding down runs the intake, releasing stops the intake
