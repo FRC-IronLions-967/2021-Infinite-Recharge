@@ -19,16 +19,16 @@ Inside the `Custom-Vision` folder, you can run the same `./gradlew build` comman
 
 ## Robot Controls
 The robot is controlled by two USB joysticks.  The first joystick should be in position 0 on the FRC Driver Station and is responsible for controlling the movement of the robot.  The y-axis on the left most analog stick of this controller controls the throttle, and the x-axis of the right most analog stick of this controller controls steering.  The other controller should be in position 1 on the FRC Driver Station, and is responsible for controlling the manipulator on the robot.  A summary of all buttons are as follows:<br>
-`A` - Sets the RPM target of the flywheel to 5600
-`B` - Sets the RPM target of the flywheel to 6100
-`X` - Holding this button down runs the kicker, releasing it turns the kicker off
-`Y` - Toggles the LEDs on the vision system, behavior does not always seem consistent
-`SELECT` - Runs the turret initialization routine
-`START` - Toggles target auto tracking
-`LBUMP` - Drops the flywheel RPM target by 50
-`RBUMP` - Increases the flywheel RPM target by 50
-`DOWN` - Increases the turret angle (decreases the firing arc)
-`UP` - Decreases the turret angle (increases the firing arc)
-`LEFT` - Toggles the intake belts
-`RTRIG` - Toggles the flywheel, flywheel will attempt to reach its target RPM
-`LTRIG` - Holding down runs the intake, releasing stops the intake
+`A` - Sets the RPM target of the flywheel to 5600<br>
+`B` - Sets the RPM target of the flywheel to 6100<br>
+`X` - Holding this button down runs the kicker, releasing it turns the kicker off<br>
+`Y` - Toggles the LEDs on the vision system, behavior does not always seem consistent<br>
+`SELECT` - Runs the turret initialization routine<br>
+`START` - Toggles target auto tracking<br>
+`LBUMP` - Drops the flywheel RPM target by 50<br>
+`RBUMP` - Increases the flywheel RPM target by 50<br>
+`DOWN` - Increases the turret angle (decreases the firing arc)<br>
+`UP` - Decreases the turret angle (increases the firing arc)<br>
+`LEFT` - Toggles the intake belts<br>
+`RTRIG` - Toggles the flywheel, flywheel will attempt to reach its target RPM<br>
+`LTRIG` - Holding down runs the intake, releasing stops the intake<br>
